@@ -10,7 +10,6 @@ class MyBot(sc2.BotAI):
 
   def __init__(self):
     super()
-    self.scv_counter = 0
     self.scout_index = -1
     self.scout_tag = None
     self.tech_lab_build = False
@@ -33,11 +32,7 @@ class MyBot(sc2.BotAI):
 
     await self.scvs(iteration, cc)
 
-    # Gas
-    if self.can_afford(REFINERY) and not self.already_pending(REFINERY) and self.units(REFINERY).amount < 1:
-      SCVs = self.workers.random
-      target = self.state.vespene_geyser.closest_to(SCVs.position)
-      await self.do(SCVs.build(REFINERY, target))
+    await self.refinery(cc)
 
     await self.attack(iteration, cc)
 
@@ -158,3 +153,9 @@ class MyBot(sc2.BotAI):
     for bay in self.units(ENGINEERINGBAY).ready.noqueue:
       if self.can_afford(ENGINEERINGBAYRESEARCH_TERRANINFANTRYARMORLEVEL1):
         await self.do(bay(ENGINEERINGBAYRESEARCH_TERRANINFANTRYARMORLEVEL1))
+
+  async def refinery(self):
+    if self.can_afford(REFINERY) and not self.already_pending(REFINERY) and self.units(REFINERY).amount < 1:
+      SCVs = self.workers.random
+      target = self.state.vespene_geyser.closest_to(SCVs.position)
+      await self.do(SCVs.build(REFINERY, target))
