@@ -66,7 +66,8 @@ class MyBot(sc2.BotAI):
   async def upgrade(self, iteration, cc):
     # Barracks
     if self.units(BARRACKS).amount < self.units(COMMANDCENTER).ready.amount * 3 and self.can_afford(BARRACKS):
-        await self.build(BARRACKS, near=cc.position.towards(self.game_info.map_center, 7))
+      if self.can_afford(BARRACKS):
+        await self.build(BARRACKS, near=cc.position.towards_random_angle(self.game_info.map_center, distance=8))
 
     if self.units(BARRACKSTECHLAB).amount < 1 and self.units(BARRACKS).amount > 1 and not self.already_pending(BARRACKSTECHLAB):
       for barrack in self.units(BARRACKS).ready:
@@ -85,6 +86,9 @@ class MyBot(sc2.BotAI):
     build_rotation = [MARAUDER, MARINE]
     self.barrack_iterator += 1
     unit = build_rotation[self.barrack_iterator % len(build_rotation)]
+
+    if iteration < 3600 and self.units(MARINE).amount > 15 and self.units(BARRACKSTECHLAB).amount == 0:
+      return
 
     # Marine
     for rax in self.units(BARRACKS).ready.noqueue:
@@ -123,7 +127,7 @@ class MyBot(sc2.BotAI):
       for unit in self.attack_units_excluding_scout().closer_than(reaction_distance, closest_enemy):
         await self.do(unit.attack(closest_enemy))
 
-    elif near_cc_count > 15 and iteration % 100 == 0:
+    elif near_cc_count > 5 and iteration % 10 == 0:
       for unit in self.attack_units_excluding_scout().closer_than(staging_pick_distance, cc.position):
         await self.do(unit.move(rally_point))
 
