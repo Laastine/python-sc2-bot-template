@@ -115,9 +115,9 @@ class MyBot(sc2.BotAI):
     # distribute
     await self.distribute_workers()
 
-    # Do we have enoguh supply depots
-    if self.supply_left < (2 if self.units(BARRACKS).amount < 3 else 4):
-      if self.can_afford(SUPPLYDEPOT):
+    # Do we have enough supply depots
+    if self.supply_left < (4 if self.units(BARRACKS).amount < 3 else 6):
+      if self.can_afford(SUPPLYDEPOT) and not self.already_pending(SUPPLYDEPOT):
         await self.build(SUPPLYDEPOT, near=cc.position.towards(self.game_info.map_center, 3))
 
   async def scout(self, iteration):
