@@ -73,11 +73,11 @@ class MyBot(sc2.BotAI):
       if self.can_afford(BARRACKS):
         await self.build(BARRACKS, near=cc.position.towards(self.game_info.map_center, 7))
 
-    # if self.units(BARRACKS).amount > 1 and self.can_afford(BARRACKSTECHLAB) and not self.tech_lab_build and iteration % 5 == 0:
-    #  for barrack in self.units(BARRACKS).ready:
-    #    print(f'can_afford(BARRACKSTECHLAB) for {barrack}')
-    #    if barrack.add_on_tag == 0:
-    #      await self.do(barrack.build(BARRACKSTECHLAB))
+    if not self.tech_lab_build:
+     for barrack in self.units(BARRACKS).ready:
+       if barrack.add_on_tag == 0:
+         await self.do(barrack.build(BARRACKSTECHLAB))
+         self.tech_lab_build = True
 
   async def build_units(self, iteration):
     # Marine
