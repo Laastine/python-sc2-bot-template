@@ -45,11 +45,11 @@ class MyBot(sc2.BotAI):
         if not err:
           self.extractor_started = True
 
-    if self.units(REFINERY).ready.exists and not self.moved_workers_to_gas:
-      self.moved_workers_to_gas = True
-      refinery = self.units(REFINERY).first
-      for SCVs in self.workers.random_group_of(3):
-        await self.do(SCVs.gather(refinery))
+    #if self.units(REFINERY).ready.exists and not self.moved_workers_to_gas:
+    #  self.moved_workers_to_gas = True
+    #  refinery = self.units(REFINERY).first
+    #  for SCVs in self.workers.random_group_of(3):
+    #    await self.do(SCVs.gather(refinery))
 
     await self.attack(iteration, cc)
 
@@ -79,11 +79,11 @@ class MyBot(sc2.BotAI):
       if self.can_afford(BARRACKS):
         await self.build(BARRACKS, near=cc.position.towards(self.game_info.map_center, 7))
 
-    if self.units(BARRACKS).amount > 1 and self.can_afford(BARRACKSTECHLAB) and not self.tech_lab_build and iteration % 5 == 0:
-      for barrack in self.units(BARRACKS).ready:
-        print(f'can_afford(BARRACKSTECHLAB) for {barrack}')
-        if barrack.add_on_tag == 0:
-          await self.do(barrack.build(BARRACKSTECHLAB))
+    # if self.units(BARRACKS).amount > 1 and self.can_afford(BARRACKSTECHLAB) and not self.tech_lab_build and iteration % 5 == 0:
+    #  for barrack in self.units(BARRACKS).ready:
+    #    print(f'can_afford(BARRACKSTECHLAB) for {barrack}')
+    #    if barrack.add_on_tag == 0:
+    #      await self.do(barrack.build(BARRACKSTECHLAB))
 
   async def build_units(self, iteration):
     # Marine
