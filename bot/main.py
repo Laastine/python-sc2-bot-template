@@ -93,14 +93,14 @@ class MyBot(sc2.BotAI):
     reaction_distance = 150
     all_units = self.units(MARINE) | self.units(MARAUDER) | self.units(MEDIVAC)
 
-    rally_point = self.game_info.map_center.towards(cc.position, distance=200)
+    rally_point = cc.position.towards(self.game_info.map_center, distance=150)
 
     near_cc_count = self.attack_units_excluding_scout().closer_than(staging_pick_distance, cc.position).amount
     near_rally_count = self.attack_units_excluding_scout().closer_than(staging_pick_distance, rally_point).amount
 
     base_attackers = self.known_enemy_units.closer_than(250, cc)
-    if base_attackers.amount > 1:
-      for unit in self.attack_units_excluding_scout():
+    if base_attackers.amount > 3:
+      for unit in self.attack_units_excluding_scout() | self.units(SCV):
         await self.do(unit.attack(base_attackers[0].position))
 
     elif self.known_enemy_units.amount > 0 and (near_cc_count + near_rally_count > 15) and iteration % 5 == 0:
@@ -108,7 +108,7 @@ class MyBot(sc2.BotAI):
       for unit in self.attack_units_excluding_scout().closer_than(reaction_distance, closest_enemy):
         await self.do(unit.attack(closest_enemy))
 
-    elif near_cc_count > 25 and iteration % 100 == 0:
+    elif near_cc_count > 15 and iteration % 100 == 0:
       for unit in self.attack_units_excluding_scout().closer_than(staging_pick_distance, cc.position):
         await self.do(unit.move(rally_point))
 
