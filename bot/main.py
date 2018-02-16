@@ -51,7 +51,7 @@ class MyBot(sc2.BotAI):
       for SCVs in self.workers.random_group_of(3):
         await self.do(SCVs.gather(refinery))
 
-    await self.attack(iteration)
+    await self.attack(iteration, cc)
 
     await self.build_units(iteration)
 
@@ -63,7 +63,9 @@ class MyBot(sc2.BotAI):
     await self.expand()
 
   def marines_excluding_scout(self):
-    return (x for x in self.units(MARINE) if x.tag != self.scout_tag)
+    def is_not_scout(unit):
+      return unit.tag != self.scout_tag
+    return self.units(MARINE).filter(is_not_scout)
 
   def find_marine_by_tag(self, unit_tag):
     for marine in self.units(MARINE):
@@ -74,13 +76,15 @@ class MyBot(sc2.BotAI):
   async def upgrade(self, iteration, cc):
     # Barracks
     if self.units(BARRACKS).amount < 3 or (self.minerals > 400 and self.units(BARRACKS).amount < 4):
-      if self.can_afford(BARRACKSTECHLAB) and not self.tech_lab_build:
-        for barrack in self.units(BARRACKS).ready:
-          print("can_afford(BARRACKSTECHLAB)")
-          if barrack.add_on_tag == 0:
-            await self.do(barrack.build(BARRACKSTECHLAB))
       if self.can_afford(BARRACKS):
         await self.build(BARRACKS, near=cc.position.towards(self.game_info.map_center, 7))
+
+    if self.units(BARRACKS).amount > 1 and self.can_afford(BARRACKSTECHLAB) and not self.tech_lab_build and iteration % 5 == 0:
+      print(f'Checking {barrack} upgrades')
+      for barrack in self.units(BARRACKS).ready:
+        print(f'can_afford(BARRACKSTECHLAB) for {barrack}')
+        if barrack.add_on_tag == 0:
+          await self.do(barrack.build(BARRACKSTECHLAB))
 
   async def build_units(self, iteration):
     # Marine
@@ -94,13 +98,15 @@ class MyBot(sc2.BotAI):
         break
       await self.do(depot(MORPH_SUPPLYDEPOT_LOWER))
 
-  async def attack(self, iteration):
-
+  async def attack(self, iteration, cc):
+    staging_pick_distance = 50
+    reaction_distance = 150
     if self.known_enemy_units.amount > 0 and iteration % 5 == 0:
-      for unit in self.marines_excluding_scout():
-        await self.do(unit.attack(self.known_enemy_units.closest_to(self.units(BARRACKS)[0])))
-    elif self.units(MARINE).amount > 14 and iteration % 100 == 0:
-      for unit in self.marines_excluding_scout():
+      closest_enemy = self.known_enemy_units.closest_to(self.units(BARRACKS)[0])
+      for unit in self.marines_excluding_scout().closer_than(reaction_distance, closest_enemy):
+        await self.do(unit.attack(closest_enemy))
+    elif self.units(MARINE).closer_than(staging_pick_distance, cc.position).amount > 14 and iteration % 100 == 0:
+      for unit in self.marines_excluding_scout().closer_than(staging_pick_distance, cc.position):
         await self.do(unit.attack(self.enemy_start_locations[0]))
 
   async def scvs(self, iteration, cc):
