@@ -28,16 +28,19 @@ class MyBot(sc2.BotAI):
     else:
       cc = cc.first
 
+    # moar SCVs
     for scv in self.units(SCV).idle:
       await self.do(scv.gather(self.state.mineral_field.closest_to(cc)))
 
     if self.can_afford(SCV) and self.workers.amount < 16 and cc.noqueue:
       await self.do(cc.train(SCV))
 
+    # Do we have enoguh supply depots
     elif self.supply_left < (2 if self.units(BARRACKS).amount < 3 else 4):
       if self.can_afford(SUPPLYDEPOT):
         await self.build(SUPPLYDEPOT, near=cc.position.towards(self.game_info.map_center, 3))
 
+    # Barracks
     elif self.units(BARRACKS).amount < 3 or (self.minerals > 400 and self.units(BARRACKS).amount < 4):
       if self.can_afford(BARRACKS):
         await self.build(BARRACKS, near=cc.position.towards(self.game_info.map_center, 7))
