@@ -13,6 +13,8 @@ class MyBot(sc2.BotAI):
     self.scout_index = -1
     self.scout_tag = None
     self.tech_lab_counter = 0
+    self.weapons_started = False
+    self.armor_started = False
 
   with open(Path(__file__).parent / "../botinfo.json") as f:
     NAME = json.load(f)["name"]
@@ -47,7 +49,7 @@ class MyBot(sc2.BotAI):
 
     await self.medivacs(cc)
 
-    # await self.expand()
+    await self.expand()
 
   def attack_units_excluding_scout(self):
     def is_not_scout(unit):
@@ -163,17 +165,19 @@ class MyBot(sc2.BotAI):
       await self.do(scout.attack(scout_set[self.scout_index]))
 
   async def expand(self):
-    if self.units(COMMANDCENTER).amount < 2 and self.units(MARINE).amount > 20 and self.can_afford(COMMANDCENTER):
+    if self.units(COMMANDCENTER).amount < 2 and self.minerals > 600:
       await self.expand_now()
 
   async def engi_bay(self, cc):
     if self.units(MARINE).amount > 6 and self.units(REFINERY).amount > 0 and self.units(ENGINEERINGBAY).amount < 1 and not self.already_pending(ENGINEERINGBAY) and self.can_afford(ENGINEERINGBAY):
       await self.build(ENGINEERINGBAY, near=cc.position.towards(self.game_info.map_center, 3))
     for bay in self.units(ENGINEERINGBAY).ready.noqueue:
-      if self.can_afford(ENGINEERINGBAYRESEARCH_TERRANINFANTRYWEAPONSLEVEL1):
+      if not self.weapons_started and self.can_afford(ENGINEERINGBAYRESEARCH_TERRANINFANTRYWEAPONSLEVEL1):
+        self.weapons_started = True
         await self.do(bay(ENGINEERINGBAYRESEARCH_TERRANINFANTRYWEAPONSLEVEL1))
     for bay in self.units(ENGINEERINGBAY).ready.noqueue:
-      if self.can_afford(ENGINEERINGBAYRESEARCH_TERRANINFANTRYARMORLEVEL1):
+      if not self.armor_started and self.can_afford(ENGINEERINGBAYRESEARCH_TERRANINFANTRYARMORLEVEL1):
+        self.armor_started = True
         await self.do(bay(ENGINEERINGBAYRESEARCH_TERRANINFANTRYARMORLEVEL1))
 
   async def refinery(self):
