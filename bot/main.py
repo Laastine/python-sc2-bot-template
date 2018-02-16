@@ -16,7 +16,7 @@ class MyBot(sc2.BotAI):
     self.moved_workers_from_gas = False
     self.scout_index = -1
     self.scout_tag = None
-    # self.tech_lab_build = False
+    self.tech_lab_build = False
 
   with open(Path(__file__).parent / "../botinfo.json") as f:
     NAME = json.load(f)["name"]
