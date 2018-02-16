@@ -63,8 +63,8 @@ class MyBot(sc2.BotAI):
 
     if self.known_enemy_units.amount > 0 and iteration % 5 == 0:
       for unit in self.marines_excluding_scout():
-        await self.do(unit.attack(self.known_enemy_units[0]))
-    elif self.units(MARINE).amount > 14 and iteration % 5 == 0:
+        await self.do(unit.attack(self.known_enemy_units.closest_to(self.units(BARRACKS)[0])))
+    elif self.units(MARINE).amount > 14 and iteration % 100 == 0:
       for unit in self.marines_excluding_scout():
         await self.do(unit.attack(self.enemy_start_locations[0]))
 
