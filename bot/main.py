@@ -104,16 +104,20 @@ class MyBot(sc2.BotAI):
         await self.do(unit.attack(self.enemy_start_locations[0]))
 
   async def scvs(self, iteration, cc):
+    # make scvs
+    for cc in self.units(COMMANDCENTER).ready.noqueue:
+      if self.can_afford(SCV) and self.units(SCV).amount < self.units(COMMANDCENTER).amount * 16:
+        await self.do(cc.train(SCV))
 
-    # moar SCVs
+    # gather closest mineral
     for scv in self.units(SCV).idle:
-      await self.do(scv.gather(self.state.mineral_field.closest_to(cc)))
+      await self.do(scv.gather(self.state.mineral_field.closest_to(scv)))
 
-    if self.can_afford(SCV) and self.workers.amount < 16 and cc.noqueue:
-      await self.do(cc.train(SCV))
+    # distribute
+    await self.distribute_workers()
 
     # Do we have enoguh supply depots
-    elif self.supply_left < (2 if self.units(BARRACKS).amount < 3 else 4):
+    if self.supply_left < (2 if self.units(BARRACKS).amount < 3 else 4):
       if self.can_afford(SUPPLYDEPOT):
         await self.build(SUPPLYDEPOT, near=cc.position.towards(self.game_info.map_center, 3))
 
