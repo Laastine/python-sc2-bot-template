@@ -108,11 +108,11 @@ class MyBot(sc2.BotAI):
       await self.do(depot(MORPH_SUPPLYDEPOT_LOWER))
 
   async def attack(self, iteration, cc):
-    staging_pick_distance = 5
-    reaction_distance = 15
+    staging_pick_distance = 15
+    reaction_distance = 75
     all_units = self.units(MARINE) | self.units(MARAUDER) | self.units(MEDIVAC)
 
-    rally_point = cc.position.towards(self.game_info.map_center, distance=15)
+    rally_point = cc.position.towards(self.game_info.map_center, distance=30)
 
     near_cc_count = self.attack_units_excluding_scout().closer_than(staging_pick_distance, cc.position).amount
     near_rally_count = self.attack_units_excluding_scout().closer_than(staging_pick_distance, rally_point).amount
