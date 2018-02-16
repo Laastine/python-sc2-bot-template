@@ -34,17 +34,7 @@ class MyBot(sc2.BotAI):
     else:
       cc = cc.first
 
-    # moar SCVs
-    for scv in self.units(SCV).idle:
-      await self.do(scv.gather(self.state.mineral_field.closest_to(cc)))
-
-    if self.can_afford(SCV) and self.workers.amount < 16 and cc.noqueue:
-      await self.do(cc.train(SCV))
-
-    # Do we have enoguh supply depots
-    elif self.supply_left < (2 if self.units(BARRACKS).amount < 3 else 4):
-      if self.can_afford(SUPPLYDEPOT):
-        await self.build(SUPPLYDEPOT, near=cc.position.towards(self.game_info.map_center, 3))
+    await self.scvs(iteration)
 
     # Gas
     # if not self.extractor_started:
@@ -69,7 +59,7 @@ class MyBot(sc2.BotAI):
         await self.do(unit.attack(self.enemy_start_locations[0]))
 
     # Barracks
-    elif self.units(BARRACKS).amount < 3 or (self.minerals > 400 and self.units(BARRACKS).amount < 4):
+    if self.units(BARRACKS).amount < 3 or (self.minerals > 400 and self.units(BARRACKS).amount < 4):
       # if self.can_afford(BARRACKSTECHLAB) and not self.tech_lab_build:
       #   for barrack in self.units(BARRACKS).ready.noqueue:
       #     print("can_afford(BARRACKSTECHLAB)")
@@ -100,6 +90,19 @@ class MyBot(sc2.BotAI):
       if marine.tag == unit_tag:
         return marine
     return None
+
+  async def scvs(self, iteration):
+    # moar SCVs
+    for scv in self.units(SCV).idle:
+      await self.do(scv.gather(self.state.mineral_field.closest_to(cc)))
+
+    if self.can_afford(SCV) and self.workers.amount < 16 and cc.noqueue:
+      await self.do(cc.train(SCV))
+
+    # Do we have enoguh supply depots
+    elif self.supply_left < (2 if self.units(BARRACKS).amount < 3 else 4):
+      if self.can_afford(SUPPLYDEPOT):
+        await self.build(SUPPLYDEPOT, near=cc.position.towards(self.game_info.map_center, 3))
 
   async def scout(self, iteration):
 
