@@ -12,7 +12,7 @@ class MyBot(sc2.BotAI):
     super()
     self.scout_index = -1
     self.scout_tag = None
-    self.tech_lab_build = False
+    self.tech_lab_counter = 0
 
   with open(Path(__file__).parent / "../botinfo.json") as f:
     NAME = json.load(f)["name"]
@@ -66,16 +66,16 @@ class MyBot(sc2.BotAI):
       if self.can_afford(BARRACKS):
         await self.build(BARRACKS, near=cc.position.towards(self.game_info.map_center, 7))
 
-    if not self.tech_lab_build:
-     for barrack in self.units(BARRACKS).ready:
-       if barrack.add_on_tag == 0:
-         await self.do(barrack.build(BARRACKSTECHLAB))
-         self.tech_lab_build = True
+    if self.tech_lab_counter < 1 and self.units(BARRACKS).amount > 1 and not self.already_pending(BARRACKSTECHLAB):
+      for barrack in self.units(BARRACKS).ready:
+        if barrack.add_on_tag == 0 and not barrack.has_add_on:
+          self.tech_lab_counter += 1
+          await self.do(barrack.build(BARRACKSTECHLAB))
 
   async def build_units(self, iteration):
     # Marine
     for rax in self.units(BARRACKS).ready.noqueue:
-      if not self.can_afford(MARINE):
+      if not self.can_afford(MARINE) or (self.can_afford(BARRACKSTECHLAB) and self.tech_lab_counter < 1):
         break
       await self.do(rax.train(MARINE))
 
