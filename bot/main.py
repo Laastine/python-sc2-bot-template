@@ -65,8 +65,7 @@ class MyBot(sc2.BotAI):
 
   async def upgrade(self, iteration, cc):
     # Barracks
-    if self.units(BARRACKS).amount < 3:
-      if self.can_afford(BARRACKS):
+    if self.units(BARRACKS).amount < self.units(COMMANDCENTER).ready.amount * 3 and self.can_afford(BARRACKS):
         await self.build(BARRACKS, near=cc.position.towards(self.game_info.map_center, 7))
 
     if self.units(BARRACKSTECHLAB).amount < 1 and self.units(BARRACKS).amount > 1 and not self.already_pending(BARRACKSTECHLAB):
@@ -181,7 +180,7 @@ class MyBot(sc2.BotAI):
       await self.do(scout.attack(scout_set[self.scout_index]))
 
   async def expand(self):
-    if self.units(COMMANDCENTER).amount < 2 and self.minerals > 600:
+    if self.units(COMMANDCENTER).amount < 2 and self.minerals > 400:
       await self.expand_now()
 
   async def engi_bay(self, cc):
