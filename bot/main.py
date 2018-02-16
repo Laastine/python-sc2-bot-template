@@ -128,7 +128,7 @@ class MyBot(sc2.BotAI):
 
     elif near_cc_count > 5 and iteration % 10 == 0:
       for unit in self.attack_units_excluding_scout().closer_than(staging_pick_distance, cc.position):
-        await self.do(unit.move(rally_point))
+        await self.do(unit.attack(rally_point))
 
     elif near_rally_count > 40 and iteration > 6000:
       for unit in self.attack_units_excluding_scout().closer_than(staging_pick_distance, rally_point):
