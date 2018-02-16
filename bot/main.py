@@ -134,6 +134,10 @@ class MyBot(sc2.BotAI):
       for unit in self.attack_units_excluding_scout().closer_than(staging_pick_distance, rally_point):
         await self.do(unit.attack(self.enemy_start_locations[0]))
 
+    elif self.attack_units_excluding_scout().amount > 180:
+      for unit in all_units:
+        await self.do(unit.attack(self.known_enemy_units.closest_to(self.enemy_start_locations[0])))
+
 
   async def scvs(self, iteration, cc):
     # make scvs
