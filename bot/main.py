@@ -61,14 +61,11 @@ class MyBot(sc2.BotAI):
       for SCVs in self.workers.random_group_of(3):
         await self.do(SCVs.gather(refinery))
 
-    if self.known_enemy_units.amount > 0 and iteration % 15 == 0:
-      print(f'Found enemy units! {self.known_enemy_units}')
+    if self.known_enemy_units.amount > 0 and iteration % 5 == 0:
       for unit in self.marines_excluding_scout():
         await self.do(unit.attack(self.known_enemy_units[0]))
-    elif self.units(MARINE).amount > 14 and iteration % 15 == 0:
-      print(f'Rush time!')
+    elif self.units(MARINE).amount > 14 and iteration % 5 == 0:
       for unit in self.marines_excluding_scout():
-        print(f'Go go go gooo! {unit}')
         await self.do(unit.attack(self.enemy_start_locations[0]))
 
     # Barracks
