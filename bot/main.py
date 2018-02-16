@@ -61,6 +61,10 @@ class MyBot(sc2.BotAI):
       for SCVs in self.workers.random_group_of(3):
         await self.do(SCVs.gather(refinery))
 
+    if self.units(MARINE).amount > 14:
+      for unit in self.units:
+        await self.do(unit.attack(self.enemy_start_locations[0]))
+
     # Barracks
     elif self.units(BARRACKS).amount < 3 or (self.minerals > 400 and self.units(BARRACKS).amount < 4):
       # if self.can_afford(BARRACKSTECHLAB) and not self.tech_lab_build:
