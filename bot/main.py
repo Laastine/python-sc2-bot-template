@@ -69,6 +69,11 @@ class MyBot(sc2.BotAI):
         break
       await self.do(rax.train(MARINE))
 
+    for depot in self.units(SUPPLYDEPOT).ready:
+      if not self.can_afford(MORPH_SUPPLYDEPOT_LOWER):
+        break
+      await self.do(depot(MORPH_SUPPLYDEPOT_LOWER))
+
     # Scout
     if self.units(MARINE).idle.amount > 3 and iteration % 50 == 1:
       target = self.enemy_start_locations[self.next_scout_index()].position
