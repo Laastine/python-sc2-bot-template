@@ -80,7 +80,7 @@ class MyBot(sc2.BotAI):
       if self.can_afford(BARRACKS):
         await self.build(BARRACKS, near=cc.position.towards(self.game_info.map_center, 7))
 
-  async def build_units():
+  async def build_units(self, iteration):
     # Marine
     for rax in self.units(BARRACKS).ready.noqueue:
       if not self.can_afford(MARINE):
