@@ -34,7 +34,7 @@ class MyBot(sc2.BotAI):
     else:
       cc = cc.first
 
-    await self.scvs(iteration)
+    await self.scvs(iteration, cc)
 
     # Gas
     # if not self.extractor_started:
@@ -91,8 +91,7 @@ class MyBot(sc2.BotAI):
         return marine
     return None
 
-  async def scvs(self, iteration):
-    cc = self.units(COMMANDCENTER)
+  async def scvs(self, iteration, cc):
 
     # moar SCVs
     for scv in self.units(SCV).idle:
