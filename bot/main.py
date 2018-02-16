@@ -74,10 +74,13 @@ class MyBot(sc2.BotAI):
         if barrack.add_on_tag == 0 and not barrack.has_add_on:
           await self.do(barrack.build(BARRACKSTECHLAB))
 
-    if self.units(BARRACKSTECHLAB).amount > 0:
+    if self.units(BARRACKSTECHLAB).ready.exists:
       for lab in self.units(BARRACKSTECHLAB).ready:
-        await self.do(lab.build(RESEARCH_CONCUSSIVESHELLS))
-        await self.do(lab.build(RESEARCH_COMBATSHIELD))
+        abilities = await self.get_available_abilities(lab)
+        if AbilityId.RESEARCH_COMBATSHIELD in abilities and self.can_afford(AbilityId.RESEARCH_COMBATSHIELD):
+          await self.do(lab(AbilityId.RESEARCH_COMBATSHIELD))
+        if AbilityId.RESEARCH_CONCUSSIVESHELLS in abilities and self.can_afford(AbilityId.RESEARCH_CONCUSSIVESHELLS):
+          await self.do(lab(AbilityId.RESEARCH_CONCUSSIVESHELLS))
 
   async def build_units(self, iteration):
     if self.minerals < 100:
