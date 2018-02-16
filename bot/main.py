@@ -151,5 +151,5 @@ class MyBot(sc2.BotAI):
       await self.do(scout.attack(scout_set[self.scout_index]))
 
   async def expand(self):
-    if self.units(COMMANDCENTER).amount < 3 and self.can_afford(COMMANDCENTER):
+    if self.units(COMMANDCENTER).amount < 2 and self.units(MARINE).amount > 20 and self.can_afford(COMMANDCENTER):
       await self.expand_now()
