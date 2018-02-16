@@ -67,7 +67,7 @@ class MyBot(sc2.BotAI):
     # Barracks
     if self.units(BARRACKS).amount < self.units(COMMANDCENTER).ready.amount * 3 and self.can_afford(BARRACKS):
       if self.can_afford(BARRACKS):
-        await self.build(BARRACKS, near=self.game_info.map_center.towards_random_angle(cc.position, distance=8))
+        await self.build(BARRACKS, near=cc.position.towards_random_angle(self.game_info.map_center, distance=8))
 
     if self.units(BARRACKSTECHLAB).amount < 1 and self.units(BARRACKS).amount > 1 and not self.already_pending(BARRACKSTECHLAB):
       for barrack in self.units(BARRACKS).ready:
