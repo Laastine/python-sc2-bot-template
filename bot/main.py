@@ -32,7 +32,7 @@ class MyBot(sc2.BotAI):
 
     await self.scvs(iteration, cc)
 
-    await self.refinery(cc)
+    await self.refinery()
 
     await self.attack(iteration, cc)
 
@@ -90,7 +90,7 @@ class MyBot(sc2.BotAI):
     rally_point = self.game_info.map_center.towards(cc.position, distance=200)
 
     if self.known_enemy_units.amount > 0 and iteration % 5 == 0:
-      closest_enemy = self.known_enemy_units.closest_to(self.units(BARRACKS)[0])
+      closest_enemy = self.known_enemy_units.closest_to(cc)
       for unit in self.marines_excluding_scout().closer_than(reaction_distance, closest_enemy):
         await self.do(unit.attack(closest_enemy))
 
