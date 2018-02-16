@@ -53,6 +53,6 @@ class MyBot(sc2.BotAI):
       for marine in self.units(MARINE).idle[0:1]:
             await self.do(marine.attack(target))
 
-  def next_scouted(self):
+  def next_scout_index(self):
     self.scout_index = (self.scout_index + 1) % len(self.enemy_start_locations)
     return self.scout_index
