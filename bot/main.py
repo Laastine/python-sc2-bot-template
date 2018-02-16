@@ -80,7 +80,7 @@ class MyBot(sc2.BotAI):
         await self.do(lab.build(RESEARCH_COMBATSHIELD))
 
   async def build_units(self, iteration):
-    if iteration % 100 == 0:
+    if iteration % 10 == 0 and not self.minerals > 400:
       return
 
     build_rotation = [MARAUDER, MARINE]
@@ -184,7 +184,7 @@ class MyBot(sc2.BotAI):
       await self.do(scout.attack(scout_set[self.scout_index]))
 
   async def expand(self):
-    if self.units(COMMANDCENTER).amount < 2 and self.minerals > 400:
+    if self.units(COMMANDCENTER).amount < 2 and self.minerals > 400 and self.units(BARRACKS).amount > 1:
       await self.expand_now()
 
   async def engi_bay(self, cc):
