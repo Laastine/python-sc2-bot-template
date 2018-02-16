@@ -51,12 +51,7 @@ class MyBot(sc2.BotAI):
     #   for SCVs in self.workers.random_group_of(3):
     #     await self.do(SCVs.gather(refinery))
 
-    if self.known_enemy_units.amount > 0 and iteration % 5 == 0:
-      for unit in self.marines_excluding_scout():
-        await self.do(unit.attack(self.known_enemy_units.closest_to(self.units(BARRACKS)[0])))
-    elif self.units(MARINE).amount > 14 and iteration % 100 == 0:
-      for unit in self.marines_excluding_scout():
-        await self.do(unit.attack(self.enemy_start_locations[0]))
+    await self.attack(iteration)
 
     # Barracks
     if self.units(BARRACKS).amount < 3 or (self.minerals > 400 and self.units(BARRACKS).amount < 4):
@@ -90,6 +85,14 @@ class MyBot(sc2.BotAI):
       if marine.tag == unit_tag:
         return marine
     return None
+
+  async def attack(self, iteration):
+    if self.known_enemy_units.amount > 0 and iteration % 5 == 0:
+      for unit in self.marines_excluding_scout():
+        await self.do(unit.attack(self.known_enemy_units.closest_to(self.units(BARRACKS)[0])))
+    elif self.units(MARINE).amount > 14 and iteration % 100 == 0:
+      for unit in self.marines_excluding_scout():
+        await self.do(unit.attack(self.enemy_start_locations[0]))
 
   async def scvs(self, iteration, cc):
 
