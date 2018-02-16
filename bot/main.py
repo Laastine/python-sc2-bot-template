@@ -10,11 +10,12 @@ class MyBot(sc2.BotAI):
 
   def __init__(self):
     super()
-    self.scout_index = 0
     self.scv_counter = 0
     self.extractor_started = False
     self.moved_workers_to_gas = False
     self.moved_workers_from_gas = False
+    self.scout_index = -1
+    self.scout_tag = None
 
   with open(Path(__file__).parent / "../botinfo.json") as f:
     NAME = json.load(f)["name"]
@@ -74,12 +75,40 @@ class MyBot(sc2.BotAI):
         break
       await self.do(depot(MORPH_SUPPLYDEPOT_LOWER))
 
-    # Scout
-    if self.units(MARINE).idle.amount > 3 and iteration % 50 == 1:
-      target = self.enemy_start_locations[self.next_scout_index()].position
-      for marine in self.units(MARINE).idle[0:1]:
-            await self.do(marine.attack(target))
+    # Run scouting subsystem
+    await self.scout(iteration)
 
-  def next_scout_index(self):
-    self.scout_index = (self.scout_index + 1) % len(self.enemy_start_locations)
-    return self.scout_index
+  def find_marine_by_tag(self, unit_tag):
+    for marine in self.units(MARINE):
+      if marine.tag == unit_tag:
+        return marine
+    return None
+
+  async def scout(self, iteration):
+
+    if not iteration % 150 == 0:
+      return
+
+    scout = self.find_marine_by_tag(self.scout_tag)
+
+    print(f'Found scout {scout}')
+
+    if scout == None:
+      # Assign scout if available
+      if self.units(MARINE).idle.amount > 3:
+        marine = self.units(MARINE).first
+        print(f'Assigned marine {marine.tag} to scout')
+        self.scout_tag = marine.tag
+        scout = marine
+
+    # Scout
+    if scout:
+      print(f'Scouting with {scout}')
+      enemy_positions = [x.position for x in self.enemy_start_locations]
+      expansion_positions = [x.position for x in self.expansion_locations]
+      scout_set = enemy_positions + expansion_positions
+      self.scout_index = (self.scout_index + 1) % len(scout_set)
+
+      print(f'Next scout target index: {self.scout_index} from {len(scout_set)}')
+
+      await self.do(scout.attack(scout_set[self.scout_index]))
