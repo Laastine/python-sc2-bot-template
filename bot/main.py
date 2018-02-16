@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+import random
 
 import sc2
 from sc2.constants import *
@@ -15,7 +16,6 @@ class MyBot(sc2.BotAI):
     self.tech_lab_counter = 0
     self.weapons_started = False
     self.armor_started = False
-    self.barrack_iterator = -1
 
   with open(Path(__file__).parent / "../botinfo.json") as f:
     NAME = json.load(f)["name"]
@@ -71,7 +71,7 @@ class MyBot(sc2.BotAI):
 
     if self.units(BARRACKSTECHLAB).amount < 1 and self.units(BARRACKS).amount > 1 and not self.already_pending(BARRACKSTECHLAB):
       for barrack in self.units(BARRACKS).ready:
-        if barrack.add_on_tag == 0 and not barrack.has_add_on:
+        if barrack.add_on_tag == 0 and not barrack.has_add_on and self.can_afford(BARRACKSTECHLAB):
           await self.do(barrack.build(BARRACKSTECHLAB))
 
     if self.units(BARRACKSTECHLAB).ready.exists:
@@ -87,18 +87,17 @@ class MyBot(sc2.BotAI):
       return
 
     build_rotation = [MARAUDER, MARINE]
-    self.barrack_iterator += 1
-    unit = build_rotation[self.barrack_iterator % len(build_rotation)]
+    unit = build_rotation[random.randint(0,1) % len(build_rotation)]
 
     if iteration < 3600 and self.units(MARINE).amount > 15 and self.units(BARRACKSTECHLAB).amount == 0:
       return
 
     # Marine
     for rax in self.units(BARRACKS).ready.noqueue:
-      if not self.can_afford(MARINE) or (self.can_afford(BARRACKSTECHLAB) and self.units(BARRACKSTECHLAB).amount > 0):
+      if not self.can_afford(MARINE) or (self.can_afford(BARRACKSTECHLAB) and self.units(BARRACKSTECHLAB).amount == 0):
         break
-      if self.units(BARRACKSTECHLAB).amount and self.can_afford(MARAUDER):
-        await self.do(rax.train(MARAUDER))
+      if self.units(BARRACKSTECHLAB).amount and self.can_afford(unit):
+        await self.do(rax.train(unit))
       else:
         await self.do(rax.train(MARINE))
 
