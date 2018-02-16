@@ -69,8 +69,9 @@ class MyBot(sc2.BotAI):
     if self.tech_lab_counter < 1 and self.units(BARRACKS).amount > 1 and not self.already_pending(BARRACKSTECHLAB):
       for barrack in self.units(BARRACKS).ready:
         if barrack.add_on_tag == 0 and not barrack.has_add_on:
-          self.tech_lab_counter += 1
           await self.do(barrack.build(BARRACKSTECHLAB))
+          if self.units(BARRACKSTECHLAB).amount > 0:
+            self.tech_lab_counter += 1
 
   async def build_units(self, iteration):
     # Marine
