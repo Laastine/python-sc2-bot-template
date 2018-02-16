@@ -84,14 +84,24 @@ class MyBot(sc2.BotAI):
 
   async def attack(self, iteration, cc):
     staging_pick_distance = 50
-    reaction_distance = 150
+    reaction_distance = 250
+    all_units = self.units(MARINE)
+
+    rally_point = self.game_info.map_center.towards(cc.position, distance=200)
+
     if self.known_enemy_units.amount > 0 and iteration % 5 == 0:
       closest_enemy = self.known_enemy_units.closest_to(self.units(BARRACKS)[0])
       for unit in self.marines_excluding_scout().closer_than(reaction_distance, closest_enemy):
         await self.do(unit.attack(closest_enemy))
+
     elif self.units(MARINE).closer_than(staging_pick_distance, cc.position).amount > 14 and iteration % 100 == 0:
       for unit in self.marines_excluding_scout().closer_than(staging_pick_distance, cc.position):
+        await self.do(unit.move(rally_point))
+
+    elif self.units(MARINE).closer_than(staging_pick_distance, rally_point).amount > 40 and iteration > 6000:
+      for unit in self.marines_excluding_scout().closer_than(staging_pick_distance, rally_point):
         await self.do(unit.attack(self.enemy_start_locations[0]))
+
 
   async def scvs(self, iteration, cc):
     # make scvs
