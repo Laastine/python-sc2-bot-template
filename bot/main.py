@@ -47,19 +47,19 @@ class MyBot(sc2.BotAI):
         await self.build(SUPPLYDEPOT, near=cc.position.towards(self.game_info.map_center, 3))
 
     # Gas
-    if not self.extractor_started:
-      if self.can_afford(REFINERY):
-        SCVs = self.workers.random
-        target = self.state.vespene_geyser.closest_to(SCVs.position)
-        err = await self.do(SCVs.build(REFINERY, target))
-        if not err:
-          self.extractor_started = True
-
-    if self.units(REFINERY).ready.exists and not self.moved_workers_to_gas:
-      self.moved_workers_to_gas = True
-      refinery = self.units(REFINERY).first
-      for SCVs in self.workers.random_group_of(3):
-        await self.do(SCVs.gather(refinery))
+    # if not self.extractor_started:
+    #   if self.can_afford(REFINERY):
+    #     SCVs = self.workers.random
+    #     target = self.state.vespene_geyser.closest_to(SCVs.position)
+    #     err = await self.do(SCVs.build(REFINERY, target))
+    #     if not err:
+    #       self.extractor_started = True
+    #
+    # if self.units(REFINERY).ready.exists and not self.moved_workers_to_gas:
+    #   self.moved_workers_to_gas = True
+    #   refinery = self.units(REFINERY).first
+    #   for SCVs in self.workers.random_group_of(3):
+    #     await self.do(SCVs.gather(refinery))
 
     if self.known_enemy_units.amount > 0 and iteration % 5 == 0:
       for unit in self.marines_excluding_scout():
