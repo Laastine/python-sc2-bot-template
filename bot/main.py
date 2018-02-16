@@ -94,12 +94,9 @@ class MyBot(sc2.BotAI):
     for rax in self.units(BARRACKS).ready.noqueue:
       if not self.can_afford(MARINE) or (self.can_afford(BARRACKSTECHLAB) and self.units(BARRACKSTECHLAB).amount > 0):
         break
-      if unit == MARAUDER:
-        if self.units(BARRACKSTECHLAB).amount and self.can_afford(MARAUDER):
-          await self.do(rax.train(MARAUDER))
-        else:
-          await self.do(rax.train(MARINE))
-      elif unit == MARINE:
+      if self.units(BARRACKSTECHLAB).amount and self.can_afford(MARAUDER):
+        await self.do(rax.train(MARAUDER))
+      else:
         await self.do(rax.train(MARINE))
 
     for depot in self.units(SUPPLYDEPOT).ready:
