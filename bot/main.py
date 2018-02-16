@@ -45,6 +45,8 @@ class MyBot(sc2.BotAI):
 
     await self.engi_bay(cc)
 
+    await self.medivacs(cc)
+
     # await self.expand()
 
   def marines_excluding_scout(self):
@@ -60,7 +62,7 @@ class MyBot(sc2.BotAI):
 
   async def upgrade(self, iteration, cc):
     # Barracks
-    if self.units(BARRACKS).amount < 3 or (self.minerals > 400 and self.units(BARRACKS).amount < 4):
+    if self.units(BARRACKS).amount < 3:
       if self.can_afford(BARRACKS):
         await self.build(BARRACKS, near=cc.position.towards(self.game_info.map_center, 7))
 
@@ -172,3 +174,13 @@ class MyBot(sc2.BotAI):
       SCVs = self.workers.random
       target = self.state.vespene_geyser.closest_to(SCVs.position)
       await self.do(SCVs.build(REFINERY, target))
+
+  async def medivacs(self, cc):
+    if self.units(ENGINEERINGBAY).amount > 0 and self.can_afford(FACTORY) and self.units(FACTORY).amount < 1 and not self.already_pending(FACTORY):
+      await self.build(FACTORY, near=cc.position.towards(self.game_info.map_center, 8))
+    if self.units(FACTORY).ready.amount > 0 and self.can_afford(STARPORT) and self.units(STARPORT).amount < 1 and not self.already_pending(STARPORT):
+      await self.build(STARPORT, near=cc.position.towards(self.game_info.map_center, 4))
+    for starport in self.units(STARPORT).ready.noqueue:
+      if not self.can_afford(MEDIVAC):
+        break
+      await self.do(starport.train(MEDIVAC))
