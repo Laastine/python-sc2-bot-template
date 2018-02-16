@@ -12,8 +12,6 @@ class MyBot(sc2.BotAI):
     super()
     self.scv_counter = 0
     self.extractor_started = False
-    self.moved_workers_to_gas = False
-    self.moved_workers_from_gas = False
     self.scout_index = -1
     self.scout_tag = None
     self.tech_lab_build = False
@@ -44,12 +42,6 @@ class MyBot(sc2.BotAI):
         err = await self.do(SCVs.build(REFINERY, target))
         if not err:
           self.extractor_started = True
-
-    #if self.units(REFINERY).ready.exists and not self.moved_workers_to_gas:
-    #  self.moved_workers_to_gas = True
-    #  refinery = self.units(REFINERY).first
-    #  for SCVs in self.workers.random_group_of(3):
-    #    await self.do(SCVs.gather(refinery))
 
     await self.attack(iteration, cc)
 
@@ -111,7 +103,7 @@ class MyBot(sc2.BotAI):
   async def scvs(self, iteration, cc):
     # make scvs
     for cc in self.units(COMMANDCENTER).ready.noqueue:
-      if self.can_afford(SCV) and self.units(SCV).amount < self.units(COMMANDCENTER).amount * 16:
+      if self.can_afford(SCV) and self.units(SCV).amount < self.units(COMMANDCENTER).amount * 19:
         await self.do(cc.train(SCV))
 
     # gather closest mineral
