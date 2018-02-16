@@ -11,7 +11,6 @@ class MyBot(sc2.BotAI):
   def __init__(self):
     super()
     self.scv_counter = 0
-    self.extractor_started = False
     self.scout_index = -1
     self.scout_tag = None
     self.tech_lab_build = False
@@ -35,13 +34,10 @@ class MyBot(sc2.BotAI):
     await self.scvs(iteration, cc)
 
     # Gas
-    if not self.extractor_started:
-      if self.can_afford(REFINERY):
-        SCVs = self.workers.random
-        target = self.state.vespene_geyser.closest_to(SCVs.position)
-        err = await self.do(SCVs.build(REFINERY, target))
-        if not err:
-          self.extractor_started = True
+    if self.can_afford(REFINERY) and not self.already_pending(REFINERY) and self.units(REFINERY).amount < 1:
+      SCVs = self.workers.random
+      target = self.state.vespene_geyser.closest_to(SCVs.position)
+      await self.do(SCVs.build(REFINERY, target))
 
     await self.attack(iteration, cc)
 
