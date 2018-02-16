@@ -60,6 +60,8 @@ class MyBot(sc2.BotAI):
     # Run scouting subsystem
     await self.scout(iteration)
 
+    await self.expand()
+
   def marines_excluding_scout(self):
     return (x for x in self.units(MARINE) if x.tag != self.scout_tag)
 
@@ -143,3 +145,7 @@ class MyBot(sc2.BotAI):
       print(f'Next scout target index: {self.scout_index} from {len(scout_set)}')
 
       await self.do(scout.attack(scout_set[self.scout_index]))
+
+  async def expand(self):
+    if self.units(COMMANDCENTER).amount < 3 and self.can_afford(COMMANDCENTER):
+      await self.expand_now()
