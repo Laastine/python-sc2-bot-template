@@ -80,7 +80,6 @@ class MyBot(sc2.BotAI):
         await self.build(BARRACKS, near=cc.position.towards(self.game_info.map_center, 7))
 
     if self.units(BARRACKS).amount > 1 and self.can_afford(BARRACKSTECHLAB) and not self.tech_lab_build and iteration % 5 == 0:
-      print(f'Checking {barrack} upgrades')
       for barrack in self.units(BARRACKS).ready:
         print(f'can_afford(BARRACKSTECHLAB) for {barrack}')
         if barrack.add_on_tag == 0:
