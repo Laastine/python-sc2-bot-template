@@ -66,19 +66,17 @@ class MyBot(sc2.BotAI):
       if self.can_afford(BARRACKS):
         await self.build(BARRACKS, near=cc.position.towards(self.game_info.map_center, 7))
 
-    if self.tech_lab_counter < 1 and self.units(BARRACKS).amount > 1 and not self.already_pending(BARRACKSTECHLAB):
+    if self.units(BARRACKSTECHLAB).amount < 1 and self.units(BARRACKS).amount > 1 and not self.already_pending(BARRACKSTECHLAB):
       for barrack in self.units(BARRACKS).ready:
         if barrack.add_on_tag == 0 and not barrack.has_add_on:
           await self.do(barrack.build(BARRACKSTECHLAB))
-          if self.units(BARRACKSTECHLAB).amount > 0:
-            self.tech_lab_counter += 1
 
   async def build_units(self, iteration):
     # Marine
     for rax in self.units(BARRACKS).ready.noqueue:
-      if not self.can_afford(MARINE) or (self.can_afford(BARRACKSTECHLAB) and self.tech_lab_counter < 1):
+      if not self.can_afford(MARINE) or (self.can_afford(BARRACKSTECHLAB) and self.units(BARRACKSTECHLAB).amount > 0):
         break
-      if self.tech_lab_counter > 0 and self.can_afford(MARAUDER):
+      if self.units(BARRACKSTECHLAB).amount and self.can_afford(MARAUDER):
         await self.do(rax.train(MARAUDER))
         break
       await self.do(rax.train(MARINE))
