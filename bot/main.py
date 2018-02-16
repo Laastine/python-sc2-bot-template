@@ -73,6 +73,11 @@ class MyBot(sc2.BotAI):
         if barrack.add_on_tag == 0 and not barrack.has_add_on:
           await self.do(barrack.build(BARRACKSTECHLAB))
 
+    if self.units(BARRACKSTECHLAB).amount > 0:
+      for lab in self.units(BARRACKSTECHLAB).ready:
+        await self.do(lab.build(RESEARCH_CONCUSSIVESHELLS))
+        await self.do(lab.build(RESEARCH_COMBATSHIELD))
+
   async def build_units(self, iteration):
     # Marine
     for rax in self.units(BARRACKS).ready.noqueue:
