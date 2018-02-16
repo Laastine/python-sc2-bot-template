@@ -15,6 +15,7 @@ class MyBot(sc2.BotAI):
     self.tech_lab_counter = 0
     self.weapons_started = False
     self.armor_started = False
+    self.barrack_iterator = -1
 
   with open(Path(__file__).parent / "../botinfo.json") as f:
     NAME = json.load(f)["name"]
@@ -79,14 +80,24 @@ class MyBot(sc2.BotAI):
         await self.do(lab.build(RESEARCH_COMBATSHIELD))
 
   async def build_units(self, iteration):
+    if iteration % 100 == 0:
+      return
+
+    build_rotation = [MARAUDER, MARINE]
+    self.barrack_iterator += 1
+    unit = build_rotation[self.barrack_iterator % len(build_rotation)]
+
     # Marine
     for rax in self.units(BARRACKS).ready.noqueue:
       if not self.can_afford(MARINE) or (self.can_afford(BARRACKSTECHLAB) and self.units(BARRACKSTECHLAB).amount > 0):
         break
-      if self.units(BARRACKSTECHLAB).amount and self.can_afford(MARAUDER):
-        await self.do(rax.train(MARAUDER))
-        break
-      await self.do(rax.train(MARINE))
+      if unit == MARAUDER:
+        if self.units(BARRACKSTECHLAB).amount and self.can_afford(MARAUDER):
+          await self.do(rax.train(MARAUDER))
+        else:
+          await self.do(rax.train(MARINE))
+      elif unit == MARINE:
+        await self.do(rax.train(MARINE))
 
     for depot in self.units(SUPPLYDEPOT).ready:
       if not self.can_afford(MORPH_SUPPLYDEPOT_LOWER):
@@ -94,16 +105,16 @@ class MyBot(sc2.BotAI):
       await self.do(depot(MORPH_SUPPLYDEPOT_LOWER))
 
   async def attack(self, iteration, cc):
-    staging_pick_distance = 50
-    reaction_distance = 150
+    staging_pick_distance = 5
+    reaction_distance = 15
     all_units = self.units(MARINE) | self.units(MARAUDER) | self.units(MEDIVAC)
 
-    rally_point = cc.position.towards(self.game_info.map_center, distance=150)
+    rally_point = cc.position.towards(self.game_info.map_center, distance=15)
 
     near_cc_count = self.attack_units_excluding_scout().closer_than(staging_pick_distance, cc.position).amount
     near_rally_count = self.attack_units_excluding_scout().closer_than(staging_pick_distance, rally_point).amount
 
-    base_attackers = self.known_enemy_units.closer_than(250, cc)
+    base_attackers = self.known_enemy_units.closer_than(10, cc)
     if base_attackers.amount > 3:
       for unit in self.attack_units_excluding_scout() | self.units(SCV):
         await self.do(unit.attack(base_attackers[0].position))
