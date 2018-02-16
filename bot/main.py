@@ -7,6 +7,11 @@ from sc2 import Race, Difficulty
 from sc2.player import Bot, Computer
 
 class MyBot(sc2.BotAI):
+
+  def __init__(self):
+    super()
+    self.scout_index = 0
+
   with open(Path(__file__).parent / "../botinfo.json") as f:
     NAME = json.load(f)["name"]
 
@@ -41,3 +46,13 @@ class MyBot(sc2.BotAI):
       if not self.can_afford(MARINE):
         break
       await self.do(rax.train(MARINE))
+
+    # Scout
+    if self.units(MARINE).idle.amount > 3 and iteration % 50 == 1:
+      target = self.enemy_start_locations[self.next_scout_index()].position
+      for marine in self.units(MARINE).idle[0:1]:
+            await self.do(marine.attack(target))
+
+  def next_scouted(self):
+    self.scout_index = (self.scout_index + 1) % len(self.enemy_start_locations)
+    return self.scout_index
