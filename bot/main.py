@@ -92,6 +92,8 @@ class MyBot(sc2.BotAI):
     return None
 
   async def scvs(self, iteration):
+    cc = self.units(COMMANDCENTER)
+
     # moar SCVs
     for scv in self.units(SCV).idle:
       await self.do(scv.gather(self.state.mineral_field.closest_to(cc)))
