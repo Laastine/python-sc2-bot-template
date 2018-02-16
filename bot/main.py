@@ -53,26 +53,9 @@ class MyBot(sc2.BotAI):
 
     await self.attack(iteration)
 
-    # Barracks
-    if self.units(BARRACKS).amount < 3 or (self.minerals > 400 and self.units(BARRACKS).amount < 4):
-      # if self.can_afford(BARRACKSTECHLAB) and not self.tech_lab_build:
-      #   for barrack in self.units(BARRACKS).ready.noqueue:
-      #     print("can_afford(BARRACKSTECHLAB)")
-      #     if barrack.add_on_tag == 0:
-      #       await self.do(barrack.build(BARRACKSTECHLAB))
-      if self.can_afford(BARRACKS):
-        await self.build(BARRACKS, near=cc.position.towards(self.game_info.map_center, 7))
+    await self.build_units(iteration)
 
-    # Marine
-    for rax in self.units(BARRACKS).ready.noqueue:
-      if not self.can_afford(MARINE):
-        break
-      await self.do(rax.train(MARINE))
-
-    for depot in self.units(SUPPLYDEPOT).ready:
-      if not self.can_afford(MORPH_SUPPLYDEPOT_LOWER):
-        break
-      await self.do(depot(MORPH_SUPPLYDEPOT_LOWER))
+    await self.upgrade(iteration)
 
     # Run scouting subsystem
     await self.scout(iteration)
@@ -86,7 +69,31 @@ class MyBot(sc2.BotAI):
         return marine
     return None
 
+  async def upgrade(self, iteration):
+    # Barracks
+    if self.units(BARRACKS).amount < 3 or (self.minerals > 400 and self.units(BARRACKS).amount < 4):
+      if self.can_afford(BARRACKSTECHLAB) and not self.tech_lab_build:
+        for barrack in self.units(BARRACKS).ready:
+          print("can_afford(BARRACKSTECHLAB)")
+          if barrack.add_on_tag == 0:
+            await self.do(barrack.build(BARRACKSTECHLAB))
+      if self.can_afford(BARRACKS):
+        await self.build(BARRACKS, near=cc.position.towards(self.game_info.map_center, 7))
+
+  async def build_units():
+    # Marine
+    for rax in self.units(BARRACKS).ready.noqueue:
+      if not self.can_afford(MARINE):
+        break
+      await self.do(rax.train(MARINE))
+
+    for depot in self.units(SUPPLYDEPOT).ready:
+      if not self.can_afford(MORPH_SUPPLYDEPOT_LOWER):
+        break
+      await self.do(depot(MORPH_SUPPLYDEPOT_LOWER))
+
   async def attack(self, iteration):
+
     if self.known_enemy_units.amount > 0 and iteration % 5 == 0:
       for unit in self.marines_excluding_scout():
         await self.do(unit.attack(self.known_enemy_units.closest_to(self.units(BARRACKS)[0])))
