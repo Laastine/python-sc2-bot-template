@@ -37,19 +37,19 @@ class MyBot(sc2.BotAI):
     await self.scvs(iteration, cc)
 
     # Gas
-    # if not self.extractor_started:
-    #   if self.can_afford(REFINERY):
-    #     SCVs = self.workers.random
-    #     target = self.state.vespene_geyser.closest_to(SCVs.position)
-    #     err = await self.do(SCVs.build(REFINERY, target))
-    #     if not err:
-    #       self.extractor_started = True
-    #
-    # if self.units(REFINERY).ready.exists and not self.moved_workers_to_gas:
-    #   self.moved_workers_to_gas = True
-    #   refinery = self.units(REFINERY).first
-    #   for SCVs in self.workers.random_group_of(3):
-    #     await self.do(SCVs.gather(refinery))
+    if not self.extractor_started:
+      if self.can_afford(REFINERY):
+        SCVs = self.workers.random
+        target = self.state.vespene_geyser.closest_to(SCVs.position)
+        err = await self.do(SCVs.build(REFINERY, target))
+        if not err:
+          self.extractor_started = True
+
+    if self.units(REFINERY).ready.exists and not self.moved_workers_to_gas:
+      self.moved_workers_to_gas = True
+      refinery = self.units(REFINERY).first
+      for SCVs in self.workers.random_group_of(3):
+        await self.do(SCVs.gather(refinery))
 
     await self.attack(iteration)
 
