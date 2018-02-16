@@ -65,7 +65,7 @@ class MyBot(sc2.BotAI):
 
   async def upgrade(self, iteration, cc):
     # Barracks
-    if self.units(BARRACKS).amount < self.units(COMMANDCENTER).ready.amount * 3 and self.can_afford(BARRACKS):
+    if (self.units(BARRACKS).amount < self.units(COMMANDCENTER).ready.amount * 2 and self.can_afford(BARRACKS)) or self.minerals > 1000 and self.units(BARRACKS).amount < 8:
       if self.can_afford(BARRACKS):
         await self.build(BARRACKS, near=cc.position.towards(self.game_info.map_center, 7))
 
@@ -80,7 +80,7 @@ class MyBot(sc2.BotAI):
         await self.do(lab.build(RESEARCH_COMBATSHIELD))
 
   async def build_units(self, iteration):
-    if iteration % 10 == 0 and not self.minerals > 400:
+    if self.minerals < 100:
       return
 
     build_rotation = [MARAUDER, MARINE]
@@ -147,7 +147,7 @@ class MyBot(sc2.BotAI):
     await self.distribute_workers()
 
     # Do we have enough supply depots
-    if self.supply_left < (4 if self.units(BARRACKS).amount < 3 else 6):
+    if self.supply_left < (6 if self.units(BARRACKS).amount < 2 else 12):
       if self.can_afford(SUPPLYDEPOT) and not self.already_pending(SUPPLYDEPOT):
         await self.build(SUPPLYDEPOT, near=cc.position.towards(self.game_info.map_center, 3))
 
@@ -181,7 +181,7 @@ class MyBot(sc2.BotAI):
       await self.do(scout.attack(scout_set[self.scout_index]))
 
   async def expand(self):
-    if self.units(COMMANDCENTER).amount < 2 and self.minerals > 400 and self.units(BARRACKS).amount > 1:
+    if self.units(COMMANDCENTER).amount < 2 and self.minerals > 400 and self.units(BARRACKS).amount > 1 and self.units(MARINE).amount > 10:
       await self.expand_now()
 
   async def engi_bay(self, cc):
