@@ -55,7 +55,7 @@ class MyBot(sc2.BotAI):
 
     await self.build_units(iteration)
 
-    await self.upgrade(iteration)
+    await self.upgrade(iteration, cc)
 
     # Run scouting subsystem
     await self.scout(iteration)
@@ -69,7 +69,7 @@ class MyBot(sc2.BotAI):
         return marine
     return None
 
-  async def upgrade(self, iteration):
+  async def upgrade(self, iteration, cc):
     # Barracks
     if self.units(BARRACKS).amount < 3 or (self.minerals > 400 and self.units(BARRACKS).amount < 4):
       if self.can_afford(BARRACKSTECHLAB) and not self.tech_lab_build:
