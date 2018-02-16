@@ -52,7 +52,9 @@ class MyBot(sc2.BotAI):
     # Run scouting subsystem
     await self.scout(iteration)
 
-    await self.expand()
+    await self.engi_bay(cc)
+
+    # await self.expand()
 
   def marines_excluding_scout(self):
     def is_not_scout(unit):
@@ -150,3 +152,13 @@ class MyBot(sc2.BotAI):
   async def expand(self):
     if self.units(COMMANDCENTER).amount < 2 and self.units(MARINE).amount > 20 and self.can_afford(COMMANDCENTER):
       await self.expand_now()
+
+  async def engi_bay(self, cc):
+    if self.units(MARINE).amount > 6 and self.units(REFINERY).amount > 0 and self.units(ENGINEERINGBAY).amount < 1 and not self.already_pending(ENGINEERINGBAY) and self.can_afford(ENGINEERINGBAY):
+      await self.build(ENGINEERINGBAY, near=cc.position.towards(self.game_info.map_center, 3))
+    for bay in self.units(ENGINEERINGBAY).ready.noqueue:
+      if self.can_afford(ENGINEERINGBAYRESEARCH_TERRANINFANTRYWEAPONSLEVEL1):
+        await self.do(bay(ENGINEERINGBAYRESEARCH_TERRANINFANTRYWEAPONSLEVEL1))
+    for bay in self.units(ENGINEERINGBAY).ready.noqueue:
+      if self.can_afford(ENGINEERINGBAYRESEARCH_TERRANINFANTRYARMORLEVEL1):
+        await self.do(bay(ENGINEERINGBAYRESEARCH_TERRANINFANTRYARMORLEVEL1))
