@@ -146,7 +146,7 @@ class MyBot(sc2.BotAI):
         print(f'Spreadscout time!')
         # No known enemies - try to find some
         for unit in all_units:
-          await self.do(unit.attack(unit.position.towards_random_angle(max_difference=2*pi, distance=45)))
+          await self.do(unit.attack(unit.position.towards_random_angle(cc.position, max_difference=2*pi, distance=45)))
 
   async def scvs(self, iteration, cc):
     # make scvs
@@ -200,7 +200,7 @@ class MyBot(sc2.BotAI):
         await self.do(scout.attack(scout_set[self.scout_index]))
       else:
         print(f'No scoutable area, doing random scouting')
-        await self.do(scout.attack(unit.position.towards_random_angle(max_difference=2*pi, distance=45)))
+        await self.do(scout.attack(unit.position.towards_random_angle(self.cc.position, max_difference=2*pi, distance=45)))
 
   async def expand(self):
     if self.units(COMMANDCENTER).amount < 2 and self.minerals > 400 and self.units(BARRACKS).amount > 1 and self.units(MARINE).amount > 10:
