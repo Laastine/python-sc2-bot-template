@@ -116,10 +116,10 @@ class MyBot(sc2.BotAI):
     near_cc_count = self.attack_units_excluding_scout().closer_than(staging_pick_distance, cc.position).amount
     near_rally_count = self.attack_units_excluding_scout().closer_than(staging_pick_distance, rally_point).amount
 
-    base_attackers = self.known_enemy_units.closer_than(10, cc)
+    base_attackers = self.known_enemy_units.closer_than(75, cc)
     all_enemies = self.known_enemy_units + self.known_enemy_structures
 
-    if base_attackers.amount > 3:
+    if base_attackers.amount > 3 and iteration % 10 == 0:
       for unit in self.attack_units_excluding_scout() | self.units(SCV):
         await self.do(unit.attack(base_attackers[0].position))
 
@@ -136,7 +136,7 @@ class MyBot(sc2.BotAI):
       for unit in self.attack_units_excluding_scout().closer_than(staging_pick_distance, rally_point):
         await self.do(unit.attack(self.enemy_start_locations[0]))
 
-    elif self.attack_units_excluding_scout().amount > 90:
+    elif self.attack_units_excluding_scout().amount > 90 and iteration % 10 == 0 and len(all_enemies) > 0:
       print(f'Over limit units and late enough -> ATTACK')
       for unit in all_units:
         await self.do(unit.attack(all_enemies[0]))
