@@ -123,12 +123,12 @@ class MyBot(sc2.BotAI):
       for unit in self.attack_units_excluding_scout() | self.units(SCV):
         await self.do(unit.attack(base_attackers[0].position))
 
-    elif self.known_enemy_units.amount > 0 and (near_cc_count + near_rally_count > 15):
+    elif self.known_enemy_units.amount > 0 and (near_cc_count + near_rally_count > 30) and iteration % 5 == 0:
       closest_enemy = self.known_enemy_units.closest_to(cc)
       for unit in self.attack_units_excluding_scout().closer_than(reaction_distance, closest_enemy):
         await self.do(unit.attack(closest_enemy))
 
-    elif near_cc_count > 5:
+    elif near_cc_count > 5 and iteration % 5 == 0:
       for unit in self.attack_units_excluding_scout().closer_than(staging_pick_distance, cc.position):
         await self.do(unit.attack(rally_point))
 
@@ -136,17 +136,10 @@ class MyBot(sc2.BotAI):
       for unit in self.attack_units_excluding_scout().closer_than(staging_pick_distance, rally_point):
         await self.do(unit.attack(self.enemy_start_locations[0]))
 
-    elif self.attack_units_excluding_scout().amount > 180 and iteration < 4000:
+    elif self.attack_units_excluding_scout().amount > 90:
       print(f'Over limit units and late enough -> ATTACK')
       for unit in all_units:
         await self.do(unit.attack(all_enemies[0]))
-
-    elif iteration > 4500:
-      print(f'Over limit units, time to end -> ATTACK')
-      for unit in all_units:
-        await self.do(unit.attack(all_enemies[0]))
-
-
 
   async def scvs(self, iteration, cc):
     # make scvs
