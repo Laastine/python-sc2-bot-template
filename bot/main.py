@@ -44,7 +44,7 @@ class MyBot(sc2.BotAI):
     await self.upgrade(iteration, cc)
 
     # Run scouting subsystem
-    await self.scout(iteration)
+    await self.scout(iteration, cc)
 
     await self.engi_bay(cc)
 
@@ -157,12 +157,16 @@ class MyBot(sc2.BotAI):
       if self.can_afford(SUPPLYDEPOT) and not self.already_pending(SUPPLYDEPOT):
         await self.build(SUPPLYDEPOT, near=cc.position.towards(self.game_info.map_center, 3))
 
-  async def scout(self, iteration):
+  async def scout(self, iteration, cc):
+
+    # Retreat if enemies
+    scout = self.find_marine_by_tag(self.scout_tag)
+    if scout and self.known_enemy_units.closer_than(50, scout.position):
+      print(f'Retreating!')
+      await self.do(scout.move(cc.position))
 
     if not iteration % 150 == 0:
       return
-
-    scout = self.find_marine_by_tag(self.scout_tag)
 
     print(f'Found scout {scout}')
 
