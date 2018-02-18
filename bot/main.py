@@ -35,14 +35,8 @@ class MyBot(sc2.BotAI):
       cc = cc.first
 
     # Run scouting subsystem
-    await self.scout(iteration, cc)
-
-    await self.attack(iteration, cc)
-
     await self.scvs(iteration, cc)
-
     await self.refinery()
-
     await self.build_units(iteration)
 
     await self.upgrade(iteration, cc)
@@ -51,7 +45,11 @@ class MyBot(sc2.BotAI):
 
     await self.medivacs(cc)
 
+    await self.attack(iteration, cc)
+    await self.scout(iteration, cc)
+
     await self.expand()
+
 
   def attack_units_excluding_scout(self):
     def is_not_scout(unit):
