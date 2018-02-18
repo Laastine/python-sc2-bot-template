@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 import random
 
+from math import pi
 import sc2
 from sc2.constants import *
 from sc2 import Race, Difficulty
@@ -136,10 +137,16 @@ class MyBot(sc2.BotAI):
       for unit in self.attack_units_excluding_scout().closer_than(staging_pick_distance, rally_point):
         await self.do(unit.attack(self.enemy_start_locations[0]))
 
-    elif self.attack_units_excluding_scout().amount > 90 and iteration % 10 == 0 and len(all_enemies) > 0:
-      print(f'Over limit units and late enough -> ATTACK')
-      for unit in all_units:
-        await self.do(unit.attack(all_enemies[0]))
+    elif self.attack_units_excluding_scout().amount > 90 and iteration % 10 == 0:
+      if len(all_enemies) > 0:
+        print(f'Over limit units and late enough -> ATTACK')
+        for unit in all_units:
+          await self.do(unit.attack(all_enemies[0]))
+      elif iteration % 30 == 0:
+        print(f'Spreadscout time!')
+        # No known enemies - try to find some
+        for unit in all_units:
+          await self.do(unit.attack(unit.position.towards_random_angle(max_difference=2*pi, distance=45)))
 
   async def scvs(self, iteration, cc):
     # make scvs
@@ -186,11 +193,14 @@ class MyBot(sc2.BotAI):
       enemy_positions = [x.position for x in self.enemy_start_locations]
       expansion_positions = [x.position for x in self.expansion_locations]
       scout_set = enemy_positions + expansion_positions
-      self.scout_index = (self.scout_index + 1) % len(scout_set)
 
-      print(f'Next scout target index: {self.scout_index} from {len(scout_set)}')
-
-      await self.do(scout.attack(scout_set[self.scout_index]))
+      if len(scout_set) > 0:
+        self.scout_index = (self.scout_index + 1) % len(scout_set)
+        print(f'Next scout target index: {self.scout_index} from {len(scout_set)}')
+        await self.do(scout.attack(scout_set[self.scout_index]))
+      else:
+        print(f'No scoutable area, doing random scouting')
+        await self.do(scout.attack(unit.position.towards_random_angle(max_difference=2*pi, distance=45)))
 
   async def expand(self):
     if self.units(COMMANDCENTER).amount < 2 and self.minerals > 400 and self.units(BARRACKS).amount > 1 and self.units(MARINE).amount > 10:
