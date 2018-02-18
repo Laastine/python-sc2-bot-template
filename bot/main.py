@@ -117,16 +117,18 @@ class MyBot(sc2.BotAI):
     near_rally_count = self.attack_units_excluding_scout().closer_than(staging_pick_distance, rally_point).amount
 
     base_attackers = self.known_enemy_units.closer_than(10, cc)
+    all_enemies = self.known_enemy_units + self.known_enemy_structures
+
     if base_attackers.amount > 3:
       for unit in self.attack_units_excluding_scout() | self.units(SCV):
         await self.do(unit.attack(base_attackers[0].position))
 
-    elif self.known_enemy_units.amount > 0 and (near_cc_count + near_rally_count > 15) and iteration % 5 == 0:
+    elif self.known_enemy_units.amount > 0 and (near_cc_count + near_rally_count > 15):
       closest_enemy = self.known_enemy_units.closest_to(cc)
       for unit in self.attack_units_excluding_scout().closer_than(reaction_distance, closest_enemy):
         await self.do(unit.attack(closest_enemy))
 
-    elif near_cc_count > 5 and iteration % 10 == 0:
+    elif near_cc_count > 5:
       for unit in self.attack_units_excluding_scout().closer_than(staging_pick_distance, cc.position):
         await self.do(unit.attack(rally_point))
 
@@ -134,15 +136,13 @@ class MyBot(sc2.BotAI):
       for unit in self.attack_units_excluding_scout().closer_than(staging_pick_distance, rally_point):
         await self.do(unit.attack(self.enemy_start_locations[0]))
 
-    elif self.attack_units_excluding_scout().amount > 180 and iteration < 8000:
+    elif self.attack_units_excluding_scout().amount > 180 and iteration < 4000:
       for unit in all_units:
-        all_enemies = self.known_enemy_units + self.known_enemy_structures
-        await self.do(unit.attack(self.known_enemy_units.closest_to(all_enemies[0])))
+        await self.do(unit.attack(all_enemies[0]))
 
-    elif iteration > 8000:
+    elif iteration > 4500:
       for unit in all_units:
-        all_enemies = self.known_enemy_units + self.known_enemy_structures
-        await self.do(unit.attack(self.known_enemy_units.closest_to(all_enemies[0])))
+        await self.do(unit.attack(all_enemies[0]))
 
 
 
