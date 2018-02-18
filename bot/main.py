@@ -108,6 +108,9 @@ class MyBot(sc2.BotAI):
       await self.do(depot(MORPH_SUPPLYDEPOT_LOWER))
 
   async def attack(self, iteration, cc):
+    if iteration % 4 == 0:
+      return
+
     staging_pick_distance = 15
     reaction_distance = 75
     all_units = self.units(MARINE) | self.units(MARAUDER) | self.units(MEDIVAC)
@@ -117,7 +120,7 @@ class MyBot(sc2.BotAI):
     near_cc_count = self.attack_units_excluding_scout().closer_than(staging_pick_distance, cc.position).amount
     near_rally_count = self.attack_units_excluding_scout().closer_than(staging_pick_distance, rally_point).amount
 
-    base_attackers = self.known_enemy_units.closer_than(75, cc)
+    base_attackers = self.known_enemy_units.closer_than(15, cc)
     all_enemies = self.known_enemy_units + self.known_enemy_structures
 
     if base_attackers.amount > 3 and iteration % 10 == 0:
@@ -168,6 +171,9 @@ class MyBot(sc2.BotAI):
 
   async def scout(self, iteration, cc):
 
+    if iteration % 3 == 0:
+      return
+ 
     # Retreat if enemies
     scout = self.find_marine_by_tag(self.scout_tag)
     if scout and self.known_enemy_units.closer_than(50, scout.position):
