@@ -33,18 +33,18 @@ class MyBot(sc2.BotAI):
     else:
       cc = cc.first
 
+    # Run scouting subsystem
+    await self.scout(iteration, cc)
+
+    await self.attack(iteration, cc)
+
     await self.scvs(iteration, cc)
 
     await self.refinery()
 
-    await self.attack(iteration, cc)
-
     await self.build_units(iteration)
 
     await self.upgrade(iteration, cc)
-
-    # Run scouting subsystem
-    await self.scout(iteration, cc)
 
     await self.engi_bay(cc)
 
@@ -134,9 +134,16 @@ class MyBot(sc2.BotAI):
       for unit in self.attack_units_excluding_scout().closer_than(staging_pick_distance, rally_point):
         await self.do(unit.attack(self.enemy_start_locations[0]))
 
-    elif self.attack_units_excluding_scout().amount > 180:
+    elif self.attack_units_excluding_scout().amount > 180 and iteration < 8000:
       for unit in all_units:
-        await self.do(unit.attack(self.known_enemy_units.closest_to(self.enemy_start_locations[0])))
+        all_enemies = self.known_enemy_units + self.known_enemy_structures
+        await self.do(unit.attack(self.known_enemy_units.closest_to(all_enemies[0])))
+
+    elif iteration > 8000:
+      for unit in all_units:
+        all_enemies = self.known_enemy_units + self.known_enemy_structures
+        await self.do(unit.attack(self.known_enemy_units.closest_to(all_enemies[0])))
+
 
 
   async def scvs(self, iteration, cc):
