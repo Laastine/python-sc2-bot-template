@@ -151,7 +151,7 @@ class MyBot(sc2.BotAI):
 
     elif iteration % 20 == 0:
       # Rally up
-      for unit self.attack_units_excluding_scout():
+      for unit in self.attack_units_excluding_scout():
         await self.do(unit.attack(rally_point))
 
 
