@@ -137,10 +137,12 @@ class MyBot(sc2.BotAI):
         await self.do(unit.attack(self.enemy_start_locations[0]))
 
     elif self.attack_units_excluding_scout().amount > 180 and iteration < 4000:
+      print(f'Over limit units and late enough -> ATTACK')
       for unit in all_units:
         await self.do(unit.attack(all_enemies[0]))
 
     elif iteration > 4500:
+      print(f'Over limit units, time to end -> ATTACK')
       for unit in all_units:
         await self.do(unit.attack(all_enemies[0]))
 
