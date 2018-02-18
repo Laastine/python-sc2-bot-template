@@ -149,6 +149,13 @@ class MyBot(sc2.BotAI):
         for unit in all_units:
           await self.do(unit.attack(unit.position.towards_random_angle(cc.position, max_difference=2*pi, distance=45)))
 
+    elif iteration % 20 == 0:
+      # Rally up
+      for unit self.attack_units_excluding_scout():
+        await self.do(unit.attack(rally_point))
+
+
+
   async def scvs(self, iteration, cc):
     # make scvs
     for cc in self.units(COMMANDCENTER).ready.noqueue:
