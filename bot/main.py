@@ -17,6 +17,7 @@ class MyBot(sc2.BotAI):
     self.tech_lab_counter = 0
     self.weapons_started = False
     self.armor_started = False
+    self.attacking = False
 
   with open(Path(__file__).parent / "../botinfo.json") as f:
     NAME = json.load(f)["name"]
@@ -113,19 +114,24 @@ class MyBot(sc2.BotAI):
     reaction_distance = 75
     all_units = self.units(MARINE) | self.units(MARAUDER) | self.units(MEDIVAC)
 
-    rally_point = cc.position.towards(self.game_info.map_center, distance=30)
+    rally_point = cc.position.towards(self.game_info.map_center, distance=15)
 
     near_cc_count = self.attack_units_excluding_scout().closer_than(staging_pick_distance, cc.position).amount
     near_rally_count = self.attack_units_excluding_scout().closer_than(staging_pick_distance, rally_point).amount
 
     base_attackers = self.known_enemy_units.closer_than(15, cc)
-    all_enemies = self.known_enemy_units + self.known_enemy_structures
+    all_enemies = self.known_enemy_units + self.known_enemy_structures + self.enemy_start_locations
+    all_units = self.attack_units_excluding_scout()
+
+    if self.attacking and iteration % 20 == 0:
+      for unit in all_units:
+        await self.do(unit.attack(self.units.enemy.prefer_close_to(unit.position)[0]))
 
     if base_attackers.amount > 3 and iteration % 10 == 0:
       for unit in self.attack_units_excluding_scout() | self.units(SCV):
         await self.do(unit.attack(base_attackers[0].position))
 
-    elif self.known_enemy_units.amount > 0 and (near_cc_count + near_rally_count > 30) and iteration % 5 == 0:
+    elif self.known_enemy_units.amount > 0 and (near_cc_count + near_rally_count > 50) and iteration % 5 == 0:
       closest_enemy = self.known_enemy_units.closest_to(cc)
       for unit in self.attack_units_excluding_scout().closer_than(reaction_distance, closest_enemy):
         await self.do(unit.attack(closest_enemy))
@@ -134,11 +140,12 @@ class MyBot(sc2.BotAI):
       for unit in self.attack_units_excluding_scout().closer_than(staging_pick_distance, cc.position):
         await self.do(unit.attack(rally_point))
 
-    elif near_rally_count > 40 and iteration > 6000:
+    elif near_rally_count > 80 and iteration > 6000:
       for unit in self.attack_units_excluding_scout().closer_than(staging_pick_distance, rally_point):
-        await self.do(unit.attack(self.enemy_start_locations[0]))
+        await self.do(unit.attack(self.known_enemy_units.closest_enemy))
 
-    elif self.attack_units_excluding_scout().amount > 90 and iteration % 10 == 0:
+    elif self.attack_units_excluding_scout().amount > 140 and iteration % 10 == 0:
+      self.attacking = True
       if len(all_enemies) > 0:
         print(f'Over limit units and late enough -> ATTACK')
         for unit in all_units:
