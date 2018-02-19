@@ -176,9 +176,6 @@ class MyBot(sc2.BotAI):
 
   async def scout(self, iteration, cc):
 
-    if iteration % 3 == 0:
-      return
- 
     # Retreat if enemies
     scout = self.find_marine_by_tag(self.scout_tag)
     if scout and self.known_enemy_units.closer_than(50, scout.position):
