@@ -112,7 +112,7 @@ class MyBot(sc2.BotAI):
 
     staging_pick_distance = 15
     reaction_distance = 75
-    all_units = self.units(MARINE) | self.units(MARAUDER) | self.units(MEDIVAC)
+    all_units = self.units(MARINE).idle | self.units(MARAUDER).idle | self.units(MEDIVAC).idle
 
     rally_point = cc.position.towards(self.game_info.map_center, distance=22)
 
@@ -123,7 +123,7 @@ class MyBot(sc2.BotAI):
     all_enemies = self.known_enemy_units + self.known_enemy_structures + self.enemy_start_locations
     all_units = self.attack_units_excluding_scout()
 
-    if self.attacking and iteration % 20 == 0:
+    if self.attacking and iteration % 10 == 0:
       for unit in all_units:
         await self.do(unit.attack(self.units.enemy.prefer_close_to(unit.position)[0]))
 
