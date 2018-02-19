@@ -114,7 +114,7 @@ class MyBot(sc2.BotAI):
     reaction_distance = 75
     all_units = self.units(MARINE) | self.units(MARAUDER) | self.units(MEDIVAC)
 
-    rally_point = cc.position.towards(self.game_info.map_center, distance=15)
+    rally_point = cc.position.towards(self.game_info.map_center, distance=22)
 
     near_cc_count = self.attack_units_excluding_scout().closer_than(staging_pick_distance, cc.position).amount
     near_rally_count = self.attack_units_excluding_scout().closer_than(staging_pick_distance, rally_point).amount
