@@ -149,21 +149,13 @@ class MyBot(sc2.BotAI):
       for unit in self.attack_units_excluding_scout().closer_than(staging_pick_distance, cc.position):
         await self.do(unit.attack(rally_point))
 
-    elif near_rally_count > 80 and iteration > 6000:
-      for unit in self.attack_units_excluding_scout().closer_than(staging_pick_distance, rally_point):
-        await self.do(unit.attack(self.known_enemy_units.closest_enemy))
-
-    elif self.attack_units_excluding_scout().amount > 140 and iteration % 10 == 0:
+    elif self.attack_units_excluding_scout().amount > 40:
       self.attacking = True
+      target = self.known_enemy_structures.random_or(self.enemy_start_locations[0]).position
       if len(all_enemies) > 0:
         print(f'Over limit units and late enough -> ATTACK')
         for unit in all_units:
-          await self.do(unit.attack(all_enemies[0]))
-      elif iteration % 30 == 0:
-        print(f'Spreadscout time!')
-        # No known enemies - try to find some
-        for unit in all_units:
-          await self.do(unit.attack(unit.position.towards_random_angle(cc.position, max_difference=2*pi, distance=45)))
+          await self.do(unit.attack(target))
       # elif iteration % 30 == 0:
       #   print(f'Spreadscout time!')
       #   # No known enemies - try to find some
