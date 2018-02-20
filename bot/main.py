@@ -191,7 +191,7 @@ class MyBot(sc2.BotAI):
     await self.distribute_workers()
 
     # Do we have enough supply depots
-    if self.supply_left < (6 if self.units(UnitTypeId.BARRACKS).amount < 2 else 12):
+    if self.supply_left < (10 if self.units(UnitTypeId.BARRACKS).amount < 2 else 20):
       if self.can_afford(UnitTypeId.SUPPLYDEPOT) and not self.already_pending(UnitTypeId.SUPPLYDEPOT):
         await self.build(UnitTypeId.SUPPLYDEPOT, near=cc.position.towards(self.game_info.map_center, 3))
 
