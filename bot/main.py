@@ -127,9 +127,9 @@ class MyBot(sc2.BotAI):
 
     if self.attacking and iteration % 10 == 0:
       for unit in all_units:
-        enemy_units = self.units.enemy.prefer_close_to(unit.position)[0]
+        enemy_units = self.units.enemy.prefer_close_to(unit.position)[:0]
         if len(enemy_units) > 0:
-          await self.do(unit.attack(self.units.enemy.prefer_close_to(unit.position)[0]))
+          await self.do(unit.attack(self.units.enemy.prefer_close_to(unit.position)[:0]))
         elif len(all_enemies) > 0:
           await self.do(unit.attack(all_enemies[0]))
 
