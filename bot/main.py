@@ -66,6 +66,9 @@ class MyBot(sc2.BotAI):
   def second_gas(self):
     return self.can_afford(UnitTypeId.REFINERY) and not self.already_pending(UnitTypeId.REFINERY) and self.units(UnitTypeId.REFINERY).ready.amount > 0 and self.units(UnitTypeId.REFINERY).ready.amount < 2 and self.attack_units_excluding_scout().amount > 30
 
+  def second_command_center(self):
+    return self.units(UnitTypeId.COMMANDCENTER).ready.amount > 1 and self.minerals > 400 and self.attack_units_excluding_scout().amount > 10
+
   async def upgrade(self, iteration, cc):
     # Barracks
     if (self.units(UnitTypeId.BARRACKS).amount < self.units(UnitTypeId.COMMANDCENTER).ready.amount * 2 and self.can_afford(UnitTypeId.BARRACKS)) or self.minerals > 1000 and self.units(UnitTypeId.BARRACKS).amount < 8:
@@ -229,7 +232,7 @@ class MyBot(sc2.BotAI):
         await self.do(scout.attack(scout.position.towards_random_angle(cc.position, max_difference=2*pi, distance=45)))
 
   async def expand(self):
-    if self.units(UnitTypeId.COMMANDCENTER).amount < 2 and self.minerals > 400 and self.units(UnitTypeId.BARRACKS).amount > 1 and self.units(UnitTypeId.MARINE).amount > 10:
+    if self.second_command_center():
       await self.expand_now()
 
   async def engi_bay(self, cc):
