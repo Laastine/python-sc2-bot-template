@@ -2,25 +2,26 @@ import json
 from pathlib import Path
 import random
 
-from math import pi
 import sc2
 from sc2.constants import AbilityId, UnitTypeId
 from sc2 import Race, Difficulty
 from sc2.player import Bot, Computer
 
+from bot.attack import Attack
+
 class MyBot(sc2.BotAI):
 
   def __init__(self):
     super()
-    self.scout_index = -1
-    self.scout_tag = None
     self.tech_lab_counter = 0
     self.weapons_started = False
     self.armor_started = False
-    self.attacking = False
+    self.attack = Attack(self)
 
   with open(Path(__file__).parent / "../botinfo.json") as f:
-    NAME = json.load(f)["name"]
+    json = json.load(f)
+    NAME = json["name"]
+    FLAGS = json["flags"]
 
   async def on_step(self, iteration):
     if iteration == 0:
@@ -46,25 +47,13 @@ class MyBot(sc2.BotAI):
 
     await self.medivacs(cc)
 
-    await self.attack(iteration, cc)
-    await self.scout(iteration, cc)
+    await self.attack.on_step(iteration)
 
     await self.expand()
 
 
-  def attack_units_excluding_scout(self):
-    def is_not_scout(unit):
-      return unit.tag != self.scout_tag
-    return self.units(UnitTypeId.MARINE).filter(is_not_scout) | self.units(UnitTypeId.MARAUDER) | self.units(UnitTypeId.MEDIVAC)
-
-  def find_marine_by_tag(self, unit_tag):
-    for marine in self.units(UnitTypeId.MARINE):
-      if marine.tag == unit_tag:
-        return marine
-    return None
-
   def second_gas(self):
-    return self.can_afford(UnitTypeId.REFINERY) and not self.already_pending(UnitTypeId.REFINERY) and self.units(UnitTypeId.REFINERY).ready.amount > 0 and self.units(UnitTypeId.REFINERY).ready.amount < 2 and self.attack_units_excluding_scout().amount > 30
+    return self.can_afford(UnitTypeId.REFINERY) and not self.already_pending(UnitTypeId.REFINERY) and self.units(UnitTypeId.REFINERY).ready.amount > 0 and self.units(UnitTypeId.REFINERY).ready.amount < 2 and self.attack.units_excluding_scout().amount > 30
 
   def second_command_center(self):
     return self.units(UnitTypeId.COMMANDCENTER).ready.amount > 1 and self.minerals > 400 and self.attack_units_excluding_scout().amount > 10
@@ -112,62 +101,6 @@ class MyBot(sc2.BotAI):
         break
       await self.do(depot(AbilityId.MORPH_SUPPLYDEPOT_LOWER))
 
-  async def attack(self, iteration, cc):
-    if iteration % 4 == 0:
-      return
-
-    staging_pick_distance = 15
-    reaction_distance = 75
-
-    rally_point = cc.position.towards(self.game_info.map_center, distance=22)
-
-    near_cc_count = self.attack_units_excluding_scout().closer_than(staging_pick_distance, cc.position).amount
-    near_rally_count = self.attack_units_excluding_scout().closer_than(staging_pick_distance, rally_point).amount
-
-    base_attackers = self.known_enemy_units.closer_than(15, cc)
-    all_enemies = self.known_enemy_units + self.known_enemy_structures + self.enemy_start_locations
-    all_units = self.attack_units_excluding_scout()
-
-    if self.attacking and iteration % 10 == 0:
-      for unit in all_units:
-        enemy_units = self.units.enemy.prefer_close_to(unit.position)[:0]
-        if len(enemy_units) > 0:
-          await self.do(unit.attack(self.units.enemy.prefer_close_to(unit.position)[:0]))
-        elif len(all_enemies) > 0:
-          await self.do(unit.attack(all_enemies[0]))
-
-    if base_attackers.amount > 3 and iteration % 10 == 0:
-      for unit in self.attack_units_excluding_scout() | self.units(UnitTypeId.SCV):
-        await self.do(unit.attack(base_attackers[0].position))
-
-    elif self.known_enemy_units.amount > 0 and (near_cc_count + near_rally_count > 50) and iteration % 5 == 0:
-      closest_enemy = self.known_enemy_units.closest_to(cc)
-      for unit in self.attack_units_excluding_scout().closer_than(reaction_distance, closest_enemy):
-        await self.do(unit.attack(closest_enemy))
-
-    elif near_cc_count > 5 and iteration % 5 == 0:
-      for unit in self.attack_units_excluding_scout().closer_than(staging_pick_distance, cc.position):
-        await self.do(unit.attack(rally_point))
-
-    elif self.attack_units_excluding_scout().amount > 40:
-      self.attacking = True
-      target = self.known_enemy_structures.random_or(self.enemy_start_locations[0]).position
-      if len(all_enemies) > 0:
-        print(f'Over limit units and late enough -> ATTACK')
-        for unit in all_units:
-          await self.do(unit.attack(target))
-      # elif iteration % 30 == 0:
-      #   print(f'Spreadscout time!')
-      #   # No known enemies - try to find some
-      #   for unit in all_units:
-      #     await self.do(unit.attack(unit.position.towards_random_angle(cc.position, max_difference=2*pi, distance=45)))
-
-    elif iteration % 20 == 0:
-      # Rally up
-      for unit in self.attack_units_excluding_scout():
-        await self.do(unit.attack(rally_point))
-
-
 
   async def scvs(self, iteration, cc):
     # make scvs
@@ -186,42 +119,6 @@ class MyBot(sc2.BotAI):
     if self.supply_left < (10 if self.units(UnitTypeId.BARRACKS).amount < 2 else 20):
       if self.can_afford(UnitTypeId.SUPPLYDEPOT) and not self.already_pending(UnitTypeId.SUPPLYDEPOT):
         await self.build(UnitTypeId.SUPPLYDEPOT, near=cc.position.towards(self.game_info.map_center, 3))
-
-  async def scout(self, iteration, cc):
-
-    # Retreat if enemies
-    scout = self.find_marine_by_tag(self.scout_tag)
-    if scout and self.known_enemy_units.closer_than(50, scout.position):
-      print(f'Retreating!')
-      await self.do(scout.move(cc.position))
-
-    if not iteration % 150 == 0:
-      return
-
-    print(f'Found scout {scout}')
-
-    if scout == None:
-      # Assign scout if available
-      if self.units(UnitTypeId.MARINE).idle.amount > 3:
-        marine = self.units(UnitTypeId.MARINE).first
-        print(f'Assigned marine {marine.tag} to scout')
-        self.scout_tag = marine.tag
-        scout = marine
-
-    # Scout
-    if scout:
-      print(f'Scouting with {scout}')
-      enemy_positions = [x.position for x in self.enemy_start_locations]
-      expansion_positions = [x.position for x in self.expansion_locations]
-      scout_set = enemy_positions + expansion_positions
-
-      if len(scout_set) > 0:
-        self.scout_index = (self.scout_index + 1) % len(scout_set)
-        print(f'Next scout target index: {self.scout_index} from {len(scout_set)}')
-        await self.do(scout.attack(scout_set[self.scout_index]))
-      else:
-        print(f'No scoutable area, doing random scouting')
-        await self.do(scout.attack(scout.position.towards_random_angle(cc.position, max_difference=2*pi, distance=45)))
 
   async def expand(self):
     if self.second_command_center():

@@ -1,5 +1,8 @@
 {
   "race": "Terran",
   "name": "Sikarikerho",
-  "log_level": "DEBUG"
+  "log_level": "DEBUG",
+  "flags": {
+    "experimental": true
+  }
 }
