@@ -4,7 +4,7 @@ import random
 
 from math import pi
 import sc2
-from sc2.constants import *
+from sc2.constants import AbilityId, UnitTypeId
 from sc2 import Race, Difficulty
 from sc2.player import Bot, Computer
 
@@ -26,10 +26,10 @@ class MyBot(sc2.BotAI):
     if iteration == 0:
       await self.chat_send(f"Name: {self.NAME}")
 
-    cc = self.units(COMMANDCENTER)
+    cc = self.units(UnitTypeId.COMMANDCENTER)
     if not cc.exists:
       target = self.known_enemy_structures.random_or(self.enemy_start_locations[0]).position
-      for unit in self.workers | self.units(MARINE):
+      for unit in self.workers | self.units(UnitTypeId.MARINE):
         await self.do(unit.attack(target))
       return
     else:
@@ -55,27 +55,27 @@ class MyBot(sc2.BotAI):
   def attack_units_excluding_scout(self):
     def is_not_scout(unit):
       return unit.tag != self.scout_tag
-    return self.units(MARINE).filter(is_not_scout) | self.units(MARAUDER) | self.units(MEDIVAC)
+    return self.units(UnitTypeId.MARINE).filter(is_not_scout) | self.units(UnitTypeId.MARAUDER) | self.units(UnitTypeId.MEDIVAC)
 
   def find_marine_by_tag(self, unit_tag):
-    for marine in self.units(MARINE):
+    for marine in self.units(UnitTypeId.MARINE):
       if marine.tag == unit_tag:
         return marine
     return None
 
   async def upgrade(self, iteration, cc):
     # Barracks
-    if (self.units(BARRACKS).amount < self.units(COMMANDCENTER).ready.amount * 2 and self.can_afford(BARRACKS)) or self.minerals > 1000 and self.units(BARRACKS).amount < 8:
-      if self.can_afford(BARRACKS):
-        await self.build(BARRACKS, near=cc.position.towards(self.game_info.map_center, 7))
+    if (self.units(UnitTypeId.BARRACKS).amount < self.units(UnitTypeId.COMMANDCENTER).ready.amount * 2 and self.can_afford(UnitTypeId.BARRACKS)) or self.minerals > 1000 and self.units(UnitTypeId.BARRACKS).amount < 8:
+      if self.can_afford(UnitTypeId.BARRACKS):
+        await self.build(UnitTypeId.BARRACKS, near=cc.position.towards(self.game_info.map_center, 7))
 
-    if self.units(BARRACKSTECHLAB).amount < 1 and self.units(BARRACKS).amount > 1 and not self.already_pending(BARRACKSTECHLAB):
-      for barrack in self.units(BARRACKS).ready:
-        if barrack.add_on_tag == 0 and not barrack.has_add_on and self.can_afford(BARRACKSTECHLAB):
-          await self.do(barrack.build(BARRACKSTECHLAB))
+    if self.units(UnitTypeId.BARRACKSTECHLAB).amount < 1 and self.units(UnitTypeId.BARRACKS).amount > 1 and not self.already_pending(UnitTypeId.BARRACKSTECHLAB):
+      for barrack in self.units(UnitTypeId.BARRACKS).ready:
+        if barrack.add_on_tag == 0 and not barrack.has_add_on and self.can_afford(UnitTypeId.BARRACKSTECHLAB):
+          await self.do(barrack.build(UnitTypeId.BARRACKSTECHLAB))
 
-    if self.units(BARRACKSTECHLAB).ready.exists:
-      for lab in self.units(BARRACKSTECHLAB).ready:
+    if self.units(UnitTypeId.BARRACKSTECHLAB).ready.exists:
+      for lab in self.units(UnitTypeId.BARRACKSTECHLAB).ready:
         abilities = await self.get_available_abilities(lab)
         if AbilityId.RESEARCH_COMBATSHIELD in abilities and self.can_afford(AbilityId.RESEARCH_COMBATSHIELD):
           await self.do(lab(AbilityId.RESEARCH_COMBATSHIELD))
@@ -86,25 +86,25 @@ class MyBot(sc2.BotAI):
     if self.minerals < 100:
       return
 
-    build_rotation = [MARAUDER, MARINE]
+    build_rotation = [UnitTypeId.MARAUDER, UnitTypeId.MARINE]
     unit = build_rotation[random.randint(0,1) % len(build_rotation)]
 
-    if iteration < 3600 and self.units(MARINE).amount > 15 and self.units(BARRACKSTECHLAB).amount == 0:
+    if iteration < 3600 and self.units(UnitTypeId.MARINE).amount > 15 and self.units(UnitTypeId.BARRACKSTECHLAB).amount == 0:
       return
 
     # Marine
-    for rax in self.units(BARRACKS).ready.noqueue:
-      if not self.can_afford(MARINE) or (self.can_afford(BARRACKSTECHLAB) and self.units(BARRACKSTECHLAB).amount == 0):
+    for rax in self.units(UnitTypeId.BARRACKS).ready.noqueue:
+      if not self.can_afford(UnitTypeId.MARINE) or (self.can_afford(UnitTypeId.BARRACKSTECHLAB) and self.units(UnitTypeId.BARRACKSTECHLAB).amount == 0):
         break
-      if self.units(BARRACKSTECHLAB).amount and self.can_afford(unit):
+      if self.units(UnitTypeId.BARRACKSTECHLAB).amount and self.can_afford(unit):
         await self.do(rax.train(unit))
       else:
-        await self.do(rax.train(MARINE))
+        await self.do(rax.train(UnitTypeId.MARINE))
 
-    for depot in self.units(SUPPLYDEPOT).ready:
-      if not self.can_afford(MORPH_SUPPLYDEPOT_LOWER):
+    for depot in self.units(UnitTypeId.SUPPLYDEPOT).ready:
+      if not self.can_afford(AbilityId.MORPH_SUPPLYDEPOT_LOWER):
         break
-      await self.do(depot(MORPH_SUPPLYDEPOT_LOWER))
+      await self.do(depot(AbilityId.MORPH_SUPPLYDEPOT_LOWER))
 
   async def attack(self, iteration, cc):
     if iteration % 4 == 0:
@@ -112,7 +112,7 @@ class MyBot(sc2.BotAI):
 
     staging_pick_distance = 15
     reaction_distance = 75
-    all_units = self.units(MARINE).idle | self.units(MARAUDER).idle | self.units(MEDIVAC).idle
+    all_units = self.units(UnitTypeId.MARINE).idle | self.units(UnitTypeId.MARAUDER).idle | self.units(UnitTypeId.MEDIVAC).idle
 
     rally_point = cc.position.towards(self.game_info.map_center, distance=22)
 
@@ -132,7 +132,7 @@ class MyBot(sc2.BotAI):
           await self.do(unit.attack(all_enemies[0]))
 
     if base_attackers.amount > 3 and iteration % 10 == 0:
-      for unit in self.attack_units_excluding_scout() | self.units(SCV):
+      for unit in self.attack_units_excluding_scout() | self.units(UnitTypeId.SCV):
         await self.do(unit.attack(base_attackers[0].position))
 
     elif self.known_enemy_units.amount > 0 and (near_cc_count + near_rally_count > 50) and iteration % 5 == 0:
@@ -169,21 +169,21 @@ class MyBot(sc2.BotAI):
 
   async def scvs(self, iteration, cc):
     # make scvs
-    for cc in self.units(COMMANDCENTER).ready.noqueue:
-      if self.can_afford(SCV) and self.units(SCV).amount < self.units(COMMANDCENTER).amount * 19:
-        await self.do(cc.train(SCV))
+    for cc in self.units(UnitTypeId.COMMANDCENTER).ready.noqueue:
+      if self.can_afford(UnitTypeId.SCV) and self.units(UnitTypeId.SCV).amount < self.units(UnitTypeId.COMMANDCENTER).amount * 19:
+        await self.do(cc.train(UnitTypeId.SCV))
 
     # gather closest mineral
-    for scv in self.units(SCV).idle:
+    for scv in self.units(UnitTypeId.SCV).idle:
       await self.do(scv.gather(self.state.mineral_field.closest_to(scv)))
 
     # distribute
     await self.distribute_workers()
 
     # Do we have enough supply depots
-    if self.supply_left < (6 if self.units(BARRACKS).amount < 2 else 12):
-      if self.can_afford(SUPPLYDEPOT) and not self.already_pending(SUPPLYDEPOT):
-        await self.build(SUPPLYDEPOT, near=cc.position.towards(self.game_info.map_center, 3))
+    if self.supply_left < (6 if self.units(UnitTypeId.BARRACKS).amount < 2 else 12):
+      if self.can_afford(UnitTypeId.SUPPLYDEPOT) and not self.already_pending(UnitTypeId.SUPPLYDEPOT):
+        await self.build(UnitTypeId.SUPPLYDEPOT, near=cc.position.towards(self.game_info.map_center, 3))
 
   async def scout(self, iteration, cc):
 
@@ -200,8 +200,8 @@ class MyBot(sc2.BotAI):
 
     if scout == None:
       # Assign scout if available
-      if self.units(MARINE).idle.amount > 3:
-        marine = self.units(MARINE).first
+      if self.units(UnitTypeId.MARINE).idle.amount > 3:
+        marine = self.units(UnitTypeId.MARINE).first
         print(f'Assigned marine {marine.tag} to scout')
         self.scout_tag = marine.tag
         scout = marine
@@ -222,33 +222,33 @@ class MyBot(sc2.BotAI):
         await self.do(scout.attack(unit.position.towards_random_angle(self.cc.position, max_difference=2*pi, distance=45)))
 
   async def expand(self):
-    if self.units(COMMANDCENTER).amount < 2 and self.minerals > 400 and self.units(BARRACKS).amount > 1 and self.units(MARINE).amount > 10:
+    if self.units(UnitTypeId.COMMANDCENTER).amount < 2 and self.minerals > 400 and self.units(UnitTypeId.BARRACKS).amount > 1 and self.units(UnitTypeId.MARINE).amount > 10:
       await self.expand_now()
 
   async def engi_bay(self, cc):
-    if self.units(MARINE).amount > 6 and self.units(REFINERY).amount > 0 and self.units(ENGINEERINGBAY).amount < 1 and not self.already_pending(ENGINEERINGBAY) and self.can_afford(ENGINEERINGBAY):
-      await self.build(ENGINEERINGBAY, near=cc.position.towards(self.game_info.map_center, 3))
-    for bay in self.units(ENGINEERINGBAY).ready.noqueue:
-      if not self.weapons_started and self.can_afford(ENGINEERINGBAYRESEARCH_TERRANINFANTRYWEAPONSLEVEL1):
+    if self.units(UnitTypeId.MARINE).amount > 6 and self.units(UnitTypeId.REFINERY).amount > 0 and self.units(UnitTypeId.ENGINEERINGBAY).amount < 1 and not self.already_pending(UnitTypeId.ENGINEERINGBAY) and self.can_afford(UnitTypeId.ENGINEERINGBAY):
+      await self.build(UnitTypeId.ENGINEERINGBAY, near=cc.position.towards(self.game_info.map_center, 3))
+    for bay in self.units(UnitTypeId.ENGINEERINGBAY).ready.noqueue:
+      if not self.weapons_started and self.can_afford(AbilityId.ENGINEERINGBAYRESEARCH_TERRANINFANTRYWEAPONSLEVEL1):
         self.weapons_started = True
-        await self.do(bay(ENGINEERINGBAYRESEARCH_TERRANINFANTRYWEAPONSLEVEL1))
-    for bay in self.units(ENGINEERINGBAY).ready.noqueue:
-      if not self.armor_started and self.can_afford(ENGINEERINGBAYRESEARCH_TERRANINFANTRYARMORLEVEL1):
+        await self.do(bay(AbilityId.ENGINEERINGBAYRESEARCH_TERRANINFANTRYWEAPONSLEVEL1))
+    for bay in self.units(UnitTypeId.ENGINEERINGBAY).ready.noqueue:
+      if not self.armor_started and self.can_afford(AbilityId.ENGINEERINGBAYRESEARCH_TERRANINFANTRYARMORLEVEL1):
         self.armor_started = True
-        await self.do(bay(ENGINEERINGBAYRESEARCH_TERRANINFANTRYARMORLEVEL1))
+        await self.do(bay(AbilityId.ENGINEERINGBAYRESEARCH_TERRANINFANTRYARMORLEVEL1))
 
   async def refinery(self):
-    if self.can_afford(REFINERY) and not self.already_pending(REFINERY) and self.units(REFINERY).amount < 1:
+    if self.can_afford(UnitTypeId.REFINERY) and not self.already_pending(UnitTypeId.REFINERY) and self.units(UnitTypeId.REFINERY).amount < 1:
       SCVs = self.workers.random
       target = self.state.vespene_geyser.closest_to(SCVs.position)
-      await self.do(SCVs.build(REFINERY, target))
+      await self.do(SCVs.build(UnitTypeId.REFINERY, target))
 
   async def medivacs(self, cc):
-    if self.units(ENGINEERINGBAY).amount > 0 and self.can_afford(FACTORY) and self.units(FACTORY).amount < 1 and not self.already_pending(FACTORY):
-      await self.build(FACTORY, near=cc.position.towards(self.game_info.map_center, 8))
-    if self.units(FACTORY).ready.amount > 0 and self.can_afford(STARPORT) and self.units(STARPORT).amount < 1 and not self.already_pending(STARPORT):
-      await self.build(STARPORT, near=cc.position.towards(self.game_info.map_center, 4))
-    for starport in self.units(STARPORT).ready.noqueue:
-      if not self.can_afford(MEDIVAC):
+    if self.units(UnitTypeId.ENGINEERINGBAY).amount > 0 and self.can_afford(UnitTypeId.FACTORY) and self.units(UnitTypeId.FACTORY).amount < 1 and not self.already_pending(UnitTypeId.FACTORY):
+      await self.build(UnitTypeId.FACTORY, near=cc.position.towards(self.game_info.map_center, 8))
+    if self.units(UnitTypeId.FACTORY).ready.amount > 0 and self.can_afford(UnitTypeId.STARPORT) and self.units(UnitTypeId.STARPORT).amount < 1 and not self.already_pending(UnitTypeId.STARPORT):
+      await self.build(UnitTypeId.STARPORT, near=cc.position.towards(self.game_info.map_center, 4))
+    for starport in self.units(UnitTypeId.STARPORT).ready.noqueue:
+      if not self.can_afford(UnitTypeId.MEDIVAC):
         break
-      await self.do(starport.train(MEDIVAC))
+      await self.do(starport.train(UnitTypeId.MEDIVAC))
