@@ -63,6 +63,9 @@ class MyBot(sc2.BotAI):
         return marine
     return None
 
+  def second_gas(self):
+    return self.can_afford(UnitTypeId.REFINERY) and not self.already_pending(UnitTypeId.REFINERY) and self.units(UnitTypeId.REFINERY).ready.amount > 0 and self.units(UnitTypeId.REFINERY).ready.amount < 2 and self.attack_units_excluding_scout().amount > 30
+
   async def upgrade(self, iteration, cc):
     # Barracks
     if (self.units(UnitTypeId.BARRACKS).amount < self.units(UnitTypeId.COMMANDCENTER).ready.amount * 2 and self.can_afford(UnitTypeId.BARRACKS)) or self.minerals > 1000 and self.units(UnitTypeId.BARRACKS).amount < 8:
@@ -238,6 +241,10 @@ class MyBot(sc2.BotAI):
 
   async def refinery(self):
     if self.can_afford(UnitTypeId.REFINERY) and not self.already_pending(UnitTypeId.REFINERY) and self.units(UnitTypeId.REFINERY).amount < 1:
+      SCVs = self.workers.random
+      target = self.state.vespene_geyser.closest_to(SCVs.position)
+      await self.do(SCVs.build(UnitTypeId.REFINERY, target))
+    elif self.second_gas():
       SCVs = self.workers.random
       target = self.state.vespene_geyser.closest_to(SCVs.position)
       await self.do(SCVs.build(UnitTypeId.REFINERY, target))
