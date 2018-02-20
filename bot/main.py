@@ -112,7 +112,6 @@ class MyBot(sc2.BotAI):
 
     staging_pick_distance = 15
     reaction_distance = 75
-    all_units = self.units(UnitTypeId.MARINE).idle | self.units(UnitTypeId.MARAUDER).idle | self.units(UnitTypeId.MEDIVAC).idle
 
     rally_point = cc.position.towards(self.game_info.map_center, distance=22)
 
