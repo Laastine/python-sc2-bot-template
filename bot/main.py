@@ -219,7 +219,7 @@ class MyBot(sc2.BotAI):
         await self.do(scout.attack(scout_set[self.scout_index]))
       else:
         print(f'No scoutable area, doing random scouting')
-        await self.do(scout.attack(unit.position.towards_random_angle(self.cc.position, max_difference=2*pi, distance=45)))
+        await self.do(scout.attack(scout.position.towards_random_angle(cc.position, max_difference=2*pi, distance=45)))
 
   async def expand(self):
     if self.units(UnitTypeId.COMMANDCENTER).amount < 2 and self.minerals > 400 and self.units(UnitTypeId.BARRACKS).amount > 1 and self.units(UnitTypeId.MARINE).amount > 10:
