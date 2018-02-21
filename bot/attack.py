@@ -4,7 +4,7 @@ from sc2.constants import AbilityId, UnitTypeId
 class Attack(object):
 
   def __init__(self, bot):
-    self.bot = bot  
+    self.bot = bot
     self.scout_index = -1
     self.scout_tag = None
     self.attacking = False
@@ -23,7 +23,7 @@ class Attack(object):
   async def on_step(self, iteration):
     cc = self.bot.units(UnitTypeId.COMMANDCENTER)
     if not cc.exists:
-      target = self.bot.known_enemy_structures.random_or(self.enemy_start_locations[0]).position
+      target = self.bot.known_enemy_structures.random_or(self.bot.enemy_start_locations[0]).position
       for unit in self.bot.workers | self.bot.units(UnitTypeId.MARINE):
         await self.bot.do(unit.attack(target))
       return
