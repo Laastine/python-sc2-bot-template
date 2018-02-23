@@ -21,7 +21,9 @@ class MyBot(sc2.BotAI):
   with open(Path(__file__).parent / "../botinfo.json") as f:
     json = json.load(f)
     NAME = json["name"]
-    FLAGS = json["flags"]
+    flags = json["flags"]
+    FLAGS = set(key for key,value in flags.items() if value == True)
+    print(f'Flags: {FLAGS}')
 
   async def on_step(self, iteration):
     if iteration == 0:
