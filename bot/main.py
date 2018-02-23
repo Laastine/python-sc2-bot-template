@@ -25,6 +25,9 @@ class MyBot(sc2.BotAI):
     FLAGS = set(key for key,value in flags.items() if value == True)
     print(f'Flags: {FLAGS}')
 
+  def has_flag(self, flag):
+    return flag in self.FLAGS
+
   async def on_step(self, iteration):
     if iteration == 0:
       await self.chat_send(f"Name: {self.NAME}")

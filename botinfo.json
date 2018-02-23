@@ -3,6 +3,6 @@
   "name": "Sikarikerho",
   "log_level": "DEBUG",
   "flags": {
-    "experimental": true
+    "spreadscout": false
   }
 }

@@ -77,11 +77,11 @@ class Attack(object):
         print(f'Over limit units and late enough -> ATTACK')
         for unit in all_units:
           await self.bot.do(unit.attack(target))
-      # elif iteration % 30 == 0:
-      #   print(f'Spreadscout time!')
-      #   # No known enemies - try to find some
-      #   for unit in all_units:
-      #     await self.do(unit.attack(unit.position.towards_random_angle(cc.position, max_difference=2*pi, distance=45)))
+      elif self.bot.has_flag("spreadscout") and iteration % 30 == 0:
+        print(f'Spreadscout time!')
+        # No known enemies - try to find some
+        for unit in all_units:
+          await self.bot.do(unit.attack(unit.position.towards_random_angle(cc.position, max_difference=2*pi, distance=45)))
 
     elif iteration % 20 == 0:
       # Rally up
